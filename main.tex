@@ -1,0 +1,479 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{geometry}
+
+\newgeometry{left=2cm,bottom=2cm}
+
+\usepackage[fixlanguage]{babelbib}
+\bibliographystyle{apalike}
+%
+\usepackage{url}
+
+\title{Meng Thesis Transferability}
+\author{Bipin Aasi}
+\date{Feb 2023}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+\begin{flushleft}
+
+\section*{Quick Summaries}
+
+% ############################################################ 
+
+
+\subsection{ Explainable AI: A Review of Machine Learning Interpretability Methods } 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item  Survey paper
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item  Liu et al. [131] while transferring non-targeted adversarial examples can be very effective in fooling neural networks, targeted adversarial examples do not work as well.
+ \item  A similar idea was later also proposed by Kuleshov et al. [154], which uses word replacement by greedy heuristics, while later
+Wang et al. [155] improved upon the genetic algorithm, achieving not only higher success rates, but also lower word substitution rates and more transferable adversarial examples when compared to [153].
+\end{itemize}
+
+
+% ############################################################ 
+
+
+
+
+% ############################################################ 
+
+\subsection{ Privacy and Security Issues in Deep Learning: A Survey \cite{liu2020privacy}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Survey Paper
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item Gradients from Surrogate Models. The adversarial samples are transferability. That is, the gradient of
+the surrogate model is also helpful for attacking the target model. Therefore, they used the gradient of the
+surrogate model to guide the update direction of the boundary attack, which improves the attack efficiency
+
+\item To a certain extent, the above improvements improve the efficiency of the algorithm. However, the gradient of the surrogate model relies on the transferability of the model. Later, Chen et al. [141] further improved the boundary attack by
+utilizing Monte Carlo estimation to determine the direction of the gradient, which does not rely on the transferability of the model
+
+\item Ilyas et al. [218] pointed out that models trained on the same dataset tend to learn similar non-robust features, which accounts for the transferability of adversarial examples. However, why DL model tend to learn non-robust features and how to make them learn robust
+features is still an open question 
+
+\end{itemize}
+
+\subsubsection*{Open problems:}
+\begin{itemize}
+  \item Perceivability: Need to propose methods that make the perturbations not only unperceivable, but preserve correct grammar and semantics
+\end{itemize}
+
+\subsubsection*{Personal Limitations:}
+\begin{itemize}
+  \item Only on images not language
+\end{itemize}
+
+
+\subsection{Adversarial Attacks on Deep Learning Models in Natural Language Processing: A Survey \cite{zhang2020adversarial}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Survey of Adversarial attacks in NLP as of April 2019 
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item Perturbation Measurement for text: 
+  \begin{itemize}
+  \item Grammar and syntax checker, Perplexity, Paraphrase
+  \item Semantic-preserving measurement: semantic similarity/distance is often performed on word vectors by adopting vectors’ similarity/distance measurements (euclidean distance or Cosine Similarity)
+  \item Edit-based measurement, minimum changes from one string to the other: Levenshtein Distance, Word Mover’s Distance, Number of changes, Jaccard similarity coefficient
+  \end{itemize}
+  \item Summary of attacks (white box, granularity, etc) and their perturb control. 
+  \item Benchmark datasets for different langauge problems (classification, translation, summary, comprehension etc.)
+\end{itemize}
+
+\subsubsection*{Open problems:}
+\begin{itemize}
+  \item Perceivability: Need to propose methods that make the perturbations not only unperceivable, but preserve correct grammar and semantics
+  \item Transferability: Organized into three levels in deep neural networks: 
+  \begin{itemize}
+      \item same architecture with different data
+      \item different architectures with same application
+      \item different architectures with different data
+  \end{itemize}
+\end{itemize}
+
+
+
+
+
+ 
+\subsection{ Adversarial Examples are not Bugs, they are Features \cite{}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Claims paradigm that adversarial robustness is a goal, and can be disentangled and pursued independently from maximizing accuracy is wrong.
+    \item Correct paradigm is: adversarial vulnerability is a direct result of sensitivity to well-generalizing features in the data
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item claim One of the most intriguing properties of adversarial examples is that they transfer across models with different architectures and independently sampled training sets
+ \item Show that non-robust features alone are sufficient for good generalization
+ \item The key differentiating aspect of our model is that adversarial perturbations arise as well-generalizing, yet brittle, features, rather than statistical anomalies
+\end{itemize}
+
+
+% ############################################################ 
+
+
+
+ 
+
+
+\subsection{Leveraging transferability and improved beam search in textual adversarial attacks   \cite{zhu2022leveraging}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Prior works utilize different word replacement strategies to generate semantic-preserving adversarial texts. These query-based methods, however, have limited exploration of the search space
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item  transferable vulnerability from surrogate models to choose vulnerable candidate words for target models. We empirically show that beam search with multiple random attacking positions works better than the commonly used greedy search with word importance ranking
+  \item improved beam search which can achieve a higher success rate than the greedy approach under the same query budget
+\end{itemize}
+
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Basis of transferability from surrogate models to perform textual adversarial attacks under the black-box setting for language models is wrong!
+\end{itemize}
+
+% ############################################################ 
+
+
+ 
+ 
+\subsection{DELVING INTO TRANSFERABLE ADVERSARIAL EXAMPLES AND BLACK-BOX ATTACKS \cite{}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Previous works mostly study the transferability using small scale dataset
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item Study both non-targeted and targeted adversarial examples, and show that while transferable non-targeted adversarial examples are easy to find, targeted adversarial examples generated using existing approaches almost never transfer with their target labels
+\item Propose novel ensemble-based approaches to generating transferable adversarial examples
+\end{itemize}
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Done on images, not language 
+\end{itemize}
+
+
+
+
+
+
+\subsection{On the Transferability of Adversarial Attacks against Neural Text Classifier   \cite{yuan2020transferability}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Systematically investigate transferability of adversarial examples for text classification and factors which influence transferability. 
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item  Investigated four critical factors of NLP neural models, including network architectures, tokenization schemes, embedding types, and model capacities and how they impact the transferability of text adversarial examples with more than sixty different models.
+  \item Described a algorithm to discover highly-transferable adversarial word replacement rules that can be applied to craft adversarial examples with strong transferability across various neural models without access to any of them
+  \item Compares the transferability rates. Required a base transferability rate
+  \item Since those adversarial examples are modelagnostic, they provide an analysis of global model behavior and help to identify dataset biases.
+\end{itemize}
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Focuses only on sentiment classification 
+\end{itemize}
+
+
+% ############################################################ 
+
+
+
+\subsection{Is BERT Really Robust? A Strong Baseline for Natural Language Attack on Text Classification and Entailment  \cite{jin2020bert}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item A baseline to generate adversarial text for text classification and textual entailment.
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item effective—it outperforms previous attacks by success rate and perturbation rate
+    \item utility-preserving—it preserves semantic content, grammaticality, and correct types classified by humans
+  \item efficient—it generates adversarial text with computational complexity linear to the text length.
+  \item Compares the transferability rates. Required a base transferability rate
+  \item there is a moderate degree of transferability between models, and the transferability is higher in the textual entailment task than in the text classification task. Moreover, the adversarial samples generated based on the model with higher prediction accuracy, i.e. the BERT model here, show higher transferability
+\end{itemize}
+
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Focuses only on sentiment classification and BERT
+\end{itemize}
+
+
+
+% ############################################################ 
+
+
+
+
+\subsection{Universal Adversarial Triggers for Attacking and Analyzing NLP \cite{wallace2019universal} }
+
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Creating a universal attack for language models which are transferable across models
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item Proposes a gradient-guided search over tokens which finds short trigger sequences (e.g., one word for classification and four words for language modeling) that successfully trigger the target prediction. 
+  \item Triggers are optimized using white-box access to a specific model, they transfer to other models for all tasks we consider
+  \item Attacks 3 modes of language tasks: Text Classification, Question and Answering (Reading Comprehension), Text Generation GPT2 model 
+  \item For SQUAD:  Uses baseline model and test the trigger’s transferability to more advanced models (with different embeddings, tokenizations, and architectures). 
+  \item The baseline is BiDAF (Seo et al., 2017). 
+  \item Test the trigger’s transferability to black-box models: QANet (Yu et al., 2018), an ELMo-based BiDAF model (ELMo), and a BiDAF model that uses character level convolutions (Char).
+\end{itemize}
+
+\subsubsection*{Future Work}
+\begin{itemize}
+  \item In future work, we aim to both attribute and defend
+against errors caused by adversarial triggers.
+\end{itemize}
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Attacks are not adversarial because they are detectable by the human eye. Do not make semantic sense to append triggers such as "zoning tapping fiennes Visually imaginative, thematically instructive and thoroughly delightful, it takes us on a roller-coaster rid"
+\end{itemize}
+
+% ############################################################ 
+
+
+\subsection{MALCOM: Generating Malicious Comments to Attack Neural Fake News Detection Models  \cite{le2020malcom} }
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Attack SOTA fake news detectors 
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item proposing a novel attack scenario against fake news detectors, in which adversaries can post malicious comments toward news articles to mislead SOTA fake news detectors
+  \item Phrase I: identifying target articles to attack. Phrase II: generating malicious comments. Phrase III: appending generated
+comments on the target articles
+  \item Developed an end-to-end adversarial comment generation framework to achieve such an attack (Malcom)
+  \item We also compare our attack model with four baselines across two real-world datasets
+  \item benchmark coherency We derive a topic coherency score of a set of arbitrary comments C and its respective set of
+articles X of size N as follows: Tk(X, C) = 1 N N i=0[1 − cos(LDAk(xcontent i ), LDAk(ci))], where cos(·) is a cosine similarity function. LDAk(·) is a Latent Dirichlet Allocation (LDA) model that returns the distribution of
+k different topics of a piece of text.
+\item quality and diversity: We use BLEU and negative-loglikelihood loss (NLL gen) scores to evaluate how well
+generated comments are in terms of both quality and diversity 
+\end{itemize}
+
+\subsubsection*{Future Work}
+\begin{itemize}
+  \item Whether or not comments generated using one sub-domain (e.g., political fake news) can be transferable to another (e.g., health fake news) is also out of scope of this paper. Hence, we leave the investigation on the proposed attack’s transferability across different datasets for future work. Moreover, we also plan to extend our method to attack graph based fake news detectors (e.g., [24]), and evaluate our model
+with other defense mechanisms such as adversarial learning
+\end{itemize}
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Future work only considers transferability across datasets not models
+\end{itemize}
+
+
+% ############################################################ 
+
+
+
+\subsection{T3: Tree-Autoencoder Constrained Adversarial Text Generation for Targeted Attack  \cite{wang2019t3} }
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Build a target-controllable adversarial attack framework T3 for text (white box attack) for sentiment analysis and question answering (QA)
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item propose a tree-based autoencoder to embed the discrete text data into a continuous representation space, upon which we optimize the adversarial perturbation
+  \item show that the generated adversarial texts have high transferability which enables the black-box attacks in practice
+  \item adversarial examples have better transferability among the models with similar architectures than different architectures
+\item perform transferability based blackbox attacks. Specifically, the transferability-based blackbox attack uses adversarial text generated from whitebox BERT model to attack blackbox SAM, and vice versa.
+\item applied to regularize the syntactic correctness of the generated text and manipulate it on either sentence (T3(Sent)) or word (T3(Word)) level 
+\end{itemize}
+
+\subsubsection*{Future Work}
+\begin{itemize}
+  \item adverserial training
+  \item Interval Bound Propagation (IBP) (Dvijotham et al., 2018) is proposed as a new technique to theoretically consider the worst-case perturbation. with other defense mechanisms such as adversarial learning
+  \item Language models including GPT2 (Radford et al., 2019) may also function as an anomaly detector
+\end{itemize}
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Attacking very basic models (BERT and Self-Attentive Mode) using basic models for QA: Bi-Directional Attention Flow (BIDAF))
+\end{itemize}
+
+
+% ############################################################ 
+
+
+ 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Propose a fast gradient-based text adversarial attack , which is about 20 times faster than existing text attack methods and could achieve similar attack performance
+    \item creates a defence that blocks transferability of adversarial attacks
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+  \item Fast Gradient Projection Method (FGPM) based on synonym substitution, which is about 20 times faster than existing text attack methods and could achieve similar attack performance
+  \item incorporate FGPM with adversarial training and propose a text defense method called Adversarial Training with FGPM enhanced by Logit pairing (ATFL). Experiments show that ATFL could significantly improve the model robustness and block the transferability of adversarial examples
+\end{itemize}
+
+
+% ############################################################ 
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+% ############################################################ 
+
+\subsection{ Adversarial Training for Large Neural Language Models \cite{liu2020adversarial}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item BERT are still vulnerable to adversarial attacks even after adversarial fine tuning.
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item Show that adversarial pretraining can improve both generalization and robustness
+\item Propose a general algorithm ALUM (Adversarial training for large neural LangUage Models), which regularizes the training objective by applying perturbations in the embedding space that maximizes the adversarial loss.
+\end{itemize}
+
+\subsubsection*{Open problems:}
+\begin{itemize}
+  \item  further study on the role of adversarial pre-training in improving generalization and robustness; speed up adversarial training; apply ALUM to other domains
+\end{itemize}
+
+% ############################################################ 
+
+
+
+ \subsection{Model Extraction and Adversarial Transferability, Your BERT is Vulnerable!  \cite{}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Adversary can steal a BERT-based API service (the victim/target model) on multiple benchmark datasets with limited prior knowledge and queries
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item show that the extracted model can lead to highly transferable adversarial attacks against the victim model.  even when there is an architectural mismatch between the victim model and the attack model
+ \item Find that unless the performance of the victim model is sacrificed, both model extraction and adversarial transferability can effectively compromise the target models
+ \item In phase 1, Model Extraction Attack (MEA) labels queries using the victim API, and then trains an extracted model on the resulting data. In phase 2, Adversarial Example Transfer (AET) generates adversarial typo examples on the extracted model, and transfers them to the victim API
+\end{itemize}
+
+\subsubsection*{Open problems:}
+\begin{itemize}
+  \item  In the future, we plan to extend our work to more complex NLP tasks, and develop more effective defences
+\end{itemize}
+
+
+
+
+
+% ############################################################ 
+
+
+ 
+ \subsection{Are Transformers More Robust Than CNNs?\cite{}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Argue that Transformers are much more robust than Convolutions Neural Networks o provide the first fair & in-depth comparisons between Transformers and CNNs, focusing on robustness evaluations.
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item CNNs can easily be as robust as Transformers on defending against adversarial attacks, if they properly adopt Transformers’ training recipes
+ \item Ablations suggest such stronger generalization is largely benefited by the Transformer’s self-attention-like architectures per se, rather than by other training setups.
+ \item Generalization for Out of Distribution samples is not soley reliant on pretraining on (external) large-scale datasets
+\end{itemize}
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Done on images, not Language 
+\end{itemize}
+
+
+% ############################################################ 
+
+
+ 
+ \subsection{Pretrained Transformers Improve Out-of-Distribution Robustness\cite{}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item BERT achieve high accuracy on indistribution examples, do they generalize to new distributions? (In context of NLP Sentiment Analysis)
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item measure the generalization of previous models including bag-of-words models, ConvNets, and LSTMs, and we show
+that pretrained Transformers’ performance declines are substantially smaller 
+\item Ablations suggest such stronger generalization is largely benefited by the Transformer’s self-attention-like architectures per se, rather than by other training setups.
+ \item finding that larger models are not necessarily more robust
+ \item distillation can be harmful
+ \item more diverse pretraining data can enhance robustness
+\end{itemize}
+
+\subsubsection*{Open problems:}
+\begin{itemize}
+  \item while pretrained Transformers are moderately robust, there remains room for future research on robustness
+\end{itemize}
+
+
+% ############################################################ 
+
+
+
+\subsection*{NLP Attacks Tools}
+\begin{itemize}
+    \item https://github.com/QData/TextAttack
+    \item https://github.com/robustness-gym/robustness-gym 
+\end{itemize}
+
+
+\newpage
+
+
+
+
+\nocite{*}
+\bibliography{mybibliography.bib}
+
+
+\end{flushleft}
+ 
+\end{document}
+
