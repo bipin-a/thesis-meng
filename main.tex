@@ -24,7 +24,45 @@
 \newpage
 \begin{flushleft}
 
+\subsection*{NLP Attacks Tools}
+\begin{itemize}
+    \item https://github.com/QData/TextAttack (IMPORTANT)
+    \item https://github.com/robustness-gym/robustness-gym 
+\end{itemize}
+
+
 \section*{Quick Summaries}
+
+% ############################################################ 
+
+
+\subsection{Holistic Evaluation of Language Models} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Mega 163 page paper. 
+    \item  Improve the transparency of language model
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+    \item present Holistic Evaluation of Language Models (HELM) 
+ \item  7 metrics (accuracy, calibration, robustness, fairness, bias, toxicity, and efficiency) 
+ \item strong correlations between accuracy, robustness, and fairness, where robustness and fairness metrics consider worst-case accuracy over a set of perturbations
+ \item observe trade-offs where the most accurate model is not the most robust or
+most fair (: for example, on NarrativeQA, TNLG v2 (530B) precipitously drops from 72.6\% standard accuracy (i.e. the third-most accurate model) to 38.9\% accuracy in the presence of robustness perturbations
+\item  For sentiment analysis on IMDB, many models are quite accurate
+and well-calibrated with marginal drops on robustness and fairness perturbations, but the
+contrast sets of Gardner et al. (2020) highlight clear limitations in model robustness (e.g. one of the most accurate models in GLM (130B) drops by more than 8\%)
+ \item  https://crfm.stanford.edu/helm/v0.1.0/ 
+\end{itemize}
+
+\subsubsection*{Future Work}
+\begin{itemize}
+    \item Encourage future work to explore new intrinsic/upstream surrogate measures of performance that can be shown to reliably predict downstream results (including for desiderata beyond accuracy) as discussed in Bommasani et al. (2021, §4.4.2)
+    \item However, these datasets do not suffice in representing the full diversity of summarization and sentiment analysis, and we encourage future work to expand on our benchmark along this axis (e.g. add datasets from domains beyond news), particularly towards domains where there is greater demand for summaries (see Reiter, 2022).
+    \item We more extensively discuss missing models in §10.4: missing-models. We encourage future work to evaluate these models to allow for common understanding, and to develop standards for research access to these models
+    \item  encourage future work to explore more sophisticated perturbation methods that may better capture important desired structure (e.g. properly model coreference in the swapping of gender pronouns, or reflect other linguistic properties of AAE speech
+\end{itemize}
 
 % ############################################################ 
 
@@ -43,42 +81,27 @@ Wang et al. [155] improved upon the genetic algorithm, achieving not only higher
 \end{itemize}
 
 
-% ############################################################ 
-
-
-
 
 % ############################################################ 
 
-\subsection{ Privacy and Security Issues in Deep Learning: A Survey \cite{liu2020privacy}} 
+
+\subsection{Perturbation Augmentation for Fairer NLP} 
 \subsubsection*{Problem to Solve}
 \begin{itemize}
-    \item Survey Paper
+    \item  replacing words demographic terms. Ex: “women like shopping” where we select the demographic term “women”, we could perturb the sentence along the
+gender axis to refer to the gender attribute “man”, resulting in “men like shopping”. We use the following demographic axes and attributes: Gender (Man, Woman, Non-Binary/Underspecified), Race/Ethnicity (White, Black, Hispanic or Latino, Asian, Native American or Alaska Native, Hawaiian or Pacific Islander), and Age (Child < 18, Young 18-44, Middle-aged 45-64, Senior 65+, Adult Unspecified).
 \end{itemize}
 
 \subsubsection*{Contributions}
 \begin{itemize}
- \item Gradients from Surrogate Models. The adversarial samples are transferability. That is, the gradient of
-the surrogate model is also helpful for attacking the target model. Therefore, they used the gradient of the
-surrogate model to guide the update direction of the boundary attack, which improves the attack efficiency
-
-\item To a certain extent, the above improvements improve the efficiency of the algorithm. However, the gradient of the surrogate model relies on the transferability of the model. Later, Chen et al. [141] further improved the boundary attack by
-utilizing Monte Carlo estimation to determine the direction of the gradient, which does not rely on the transferability of the model
-
-\item Ilyas et al. [218] pointed out that models trained on the same dataset tend to learn similar non-robust features, which accounts for the transferability of adversarial examples. However, why DL model tend to learn non-robust features and how to make them learn robust
-features is still an open question 
-
+ \item  Pretrain FairBERTa, the first large language model trained on demographically perturbed corpora, and show that its fairness is improved, without degrading performance on downstream task
+ \item Formalizing Demographic Perturbation Augmentation. use a modified frequencybased sampling strategy that ensures representation of race/ethnicity perturbations, preserving dataset size
+ \item Effect of fairtuning, i.e. finetuning models on perturbation augmented datasets, on model fairness.
+ \item ropose fairscore, an extrinsic fairness metric that uses the perturber to measure fairness as robustness to demographic perturbation.
 \end{itemize}
 
-\subsubsection*{Open problems:}
-\begin{itemize}
-  \item Perceivability: Need to propose methods that make the perturbations not only unperceivable, but preserve correct grammar and semantics
-\end{itemize}
 
-\subsubsection*{Personal Limitations:}
-\begin{itemize}
-  \item Only on images not language
-\end{itemize}
+% ############################################################ 
 
 
 \subsection{Adversarial Attacks on Deep Learning Models in Natural Language Processing: A Survey \cite{zhang2020adversarial}} 
@@ -111,9 +134,7 @@ features is still an open question
 \end{itemize}
 
 
-
-
-
+% ############################################################ 
  
 \subsection{ Adversarial Examples are not Bugs, they are Features \cite{}} 
 \subsubsection*{Problem to Solve}
@@ -134,9 +155,6 @@ features is still an open question
 
 
 
- 
-
-
 \subsection{Leveraging transferability and improved beam search in textual adversarial attacks   \cite{zhu2022leveraging}} 
 \subsubsection*{Problem to Solve}
 \begin{itemize}
@@ -155,30 +173,32 @@ features is still an open question
     \item Basis of transferability from surrogate models to perform textual adversarial attacks under the black-box setting for language models is wrong!
 \end{itemize}
 
+
+
 % ############################################################ 
 
 
- 
- 
-\subsection{DELVING INTO TRANSFERABLE ADVERSARIAL EXAMPLES AND BLACK-BOX ATTACKS \cite{}} 
+
+ \subsection{Model Extraction and Adversarial Transferability, Your BERT is Vulnerable!  \cite{}} 
 \subsubsection*{Problem to Solve}
 \begin{itemize}
-    \item Previous works mostly study the transferability using small scale dataset
+    \item Adversary can steal a BERT-based API service (the victim/target model) on multiple benchmark datasets with limited prior knowledge and queries
 \end{itemize}
 
 \subsubsection*{Contributions}
 \begin{itemize}
- \item Study both non-targeted and targeted adversarial examples, and show that while transferable non-targeted adversarial examples are easy to find, targeted adversarial examples generated using existing approaches almost never transfer with their target labels
-\item Propose novel ensemble-based approaches to generating transferable adversarial examples
+ \item show that the extracted model can lead to highly transferable adversarial attacks against the victim model.  even when there is an architectural mismatch between the victim model and the attack model
+ \item Find that unless the performance of the victim model is sacrificed, both model extraction and adversarial transferability can effectively compromise the target models
+ \item In phase 1, Model Extraction Attack (MEA) labels queries using the victim API, and then trains an extracted model on the resulting data. In phase 2, Adversarial Example Transfer (AET) generates adversarial typo examples on the extracted model, and transfers them to the victim API
 \end{itemize}
 
-\subsubsection*{Personal Limitations}
+\subsubsection*{Open problems:}
 \begin{itemize}
-    \item Done on images, not language 
+  \item  In the future, we plan to extend our work to more complex NLP tasks, and develop more effective defences
 \end{itemize}
 
 
-
+% ############################################################ 
 
 
 
@@ -331,8 +351,11 @@ with other defense mechanisms such as adversarial learning
 
 % ############################################################ 
 
+\subsection{ Adversarial Training with Fast Gradient Projection Method
+against Synonym Substitution based Text Attacks  \cite{wang2021adversarial} }
 
- 
+
+
 \subsubsection*{Problem to Solve}
 \begin{itemize}
     \item Propose a fast gradient-based text adversarial attack , which is about 20 times faster than existing text attack methods and could achieve similar attack performance
@@ -346,16 +369,6 @@ with other defense mechanisms such as adversarial learning
 \end{itemize}
 
 
-% ############################################################ 
-
-
-
-
-
-
-
-
- 
  
 
 
@@ -377,29 +390,6 @@ with other defense mechanisms such as adversarial learning
 \begin{itemize}
   \item  further study on the role of adversarial pre-training in improving generalization and robustness; speed up adversarial training; apply ALUM to other domains
 \end{itemize}
-
-% ############################################################ 
-
-
-
- \subsection{Model Extraction and Adversarial Transferability, Your BERT is Vulnerable!  \cite{}} 
-\subsubsection*{Problem to Solve}
-\begin{itemize}
-    \item Adversary can steal a BERT-based API service (the victim/target model) on multiple benchmark datasets with limited prior knowledge and queries
-\end{itemize}
-
-\subsubsection*{Contributions}
-\begin{itemize}
- \item show that the extracted model can lead to highly transferable adversarial attacks against the victim model.  even when there is an architectural mismatch between the victim model and the attack model
- \item Find that unless the performance of the victim model is sacrificed, both model extraction and adversarial transferability can effectively compromise the target models
- \item In phase 1, Model Extraction Attack (MEA) labels queries using the victim API, and then trains an extracted model on the resulting data. In phase 2, Adversarial Example Transfer (AET) generates adversarial typo examples on the extracted model, and transfers them to the victim API
-\end{itemize}
-
-\subsubsection*{Open problems:}
-\begin{itemize}
-  \item  In the future, we plan to extend our work to more complex NLP tasks, and develop more effective defences
-\end{itemize}
-
 
 
 
@@ -424,6 +414,64 @@ with other defense mechanisms such as adversarial learning
 \subsubsection*{Personal Limitations}
 \begin{itemize}
     \item Done on images, not Language 
+\end{itemize}
+
+
+% ############################################################ 
+
+
+ 
+ 
+\subsection{DELVING INTO TRANSFERABLE ADVERSARIAL EXAMPLES AND BLACK-BOX ATTACKS \cite{}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Previous works mostly study the transferability using small scale dataset
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item Study both non-targeted and targeted adversarial examples, and show that while transferable non-targeted adversarial examples are easy to find, targeted adversarial examples generated using existing approaches almost never transfer with their target labels
+\item Propose novel ensemble-based approaches to generating transferable adversarial examples
+\end{itemize}
+
+\subsubsection*{Personal Limitations}
+\begin{itemize}
+    \item Done on images, not language 
+\end{itemize}
+
+
+
+
+% ############################################################ 
+
+\subsection{ Privacy and Security Issues in Deep Learning: A Survey \cite{liu2020privacy}} 
+\subsubsection*{Problem to Solve}
+\begin{itemize}
+    \item Survey Paper
+\end{itemize}
+
+\subsubsection*{Contributions}
+\begin{itemize}
+ \item Gradients from Surrogate Models. The adversarial samples are transferability. That is, the gradient of
+the surrogate model is also helpful for attacking the target model. Therefore, they used the gradient of the
+surrogate model to guide the update direction of the boundary attack, which improves the attack efficiency
+
+\item To a certain extent, the above improvements improve the efficiency of the algorithm. However, the gradient of the surrogate model relies on the transferability of the model. Later, Chen et al. [141] further improved the boundary attack by
+utilizing Monte Carlo estimation to determine the direction of the gradient, which does not rely on the transferability of the model
+
+\item Ilyas et al. [218] pointed out that models trained on the same dataset tend to learn similar non-robust features, which accounts for the transferability of adversarial examples. However, why DL model tend to learn non-robust features and how to make them learn robust
+features is still an open question 
+
+\end{itemize}
+
+\subsubsection*{Open problems:}
+\begin{itemize}
+  \item Perceivability: Need to propose methods that make the perturbations not only unperceivable, but preserve correct grammar and semantics      
+\end{itemize}
+
+\subsubsection*{Personal Limitations:}
+\begin{itemize}
+  \item Only on images not language
 \end{itemize}
 
 
@@ -456,15 +504,6 @@ that pretrained Transformers’ performance declines are substantially smaller
 % ############################################################ 
 
 
-
-\subsection*{NLP Attacks Tools}
-\begin{itemize}
-    \item https://github.com/QData/TextAttack
-    \item https://github.com/robustness-gym/robustness-gym 
-\end{itemize}
-
-
-\newpage
 
 
 
