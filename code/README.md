@@ -51,7 +51,7 @@ Futhermore, if two similar models are unable to have similar performance, even a
 
 ## Design: 
 
-Link to live board [here](https://miro.com/app/embed/uXjVMQeQn-0=/?pres=1&frameId=3458764552760387719&embedId=230974042676)
+Link to live board [here](https://miro.com/app/live-embed/uXjVMQeQn-0=/?moveToViewport=-2200,-3018,6757,2929&embedId=895320044114)
 
 <figure align="center">
   <img 
