@@ -51,7 +51,14 @@ Futhermore, if two similar models are unable to have similar performance, even a
 
 ## Design: 
 
-- User enters their model. 
+Link to live board [here](https://miro.com/app/embed/uXjVMQeQn-0=/?pres=1&frameId=3458764552760387719&embedId=230974042676)
 
+<figure align="center">
+  <img 
+    src="imgs/Design.png" 
+    width="900" 
+    alt="Design.png" 
+    title="Design.png">
+    <figcaption>Fig.1 - Design.</figcaption>
+</figure>
 
-<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVMQeQn-0=/?moveToViewport=-2410,-3358,6654,3526&embedId=30229491681" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
