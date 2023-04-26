@@ -23,3 +23,15 @@ Avgerage or minimum measure of perturbations of the input required for a misclas
 ### Open Ended Questions: 
 
 - Why don't adverserial attacks for text transfer between models, whereas adverserial attacks for images are transferable?
+
+
+## 2023-04-21
+
+### Final Idea:
+- Rank the top N adversarial attacks on language models on the basis of `Transferability` and `Semantic Similarity`. Using [Adversarial GLUE: A Multi-Task Benchmark for Robustness Evaluation of Language Models, Boxin Wang 2021](https://openreview.net/forum?id=GF9cSKI3A_q) and [On the Transferability of Adversarial Attacks against Neural Text Classifier, Liping Yuan 2021](https://aclanthology.org/2021.emnlp-main.121.pdf) as inspiration. 
+
+
+
+
+### Action Items: 
+- Implement a POC with a small dataset and a small model
