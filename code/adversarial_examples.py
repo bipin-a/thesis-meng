@@ -6,6 +6,7 @@ from textattack.goal_functions import UntargetedClassification
 import pandas as pd
 from textattack.attack_recipes import (
     A2TYoo2021,
+    BERTAttackLi2020
 )
 from datasets import load_dataset
 
@@ -29,22 +30,24 @@ def load_language_models():
     return language_model,"bert-cola-tuned"
 
 def run_attacks(language_model,model_name, dataset):
-    
-    # Defining attack
-    attack_model = A2TYoo2021
-    attack_name = "A2TYoo2021"
-    attack = attack_model.build(language_model)
-    
-    attack_args = textattack.AttackArgs(
-        parallel = False,
-        num_examples=1000,
-        csv_coloring_style = 'html',
-        log_to_csv=f"adv_examples/{attack_name}{model_name}_html.csv",
-        # checkpoint_interval=5,
-        # checkpoint_dir="checkpoints",
-        disable_stdout=True
-    )
-    
+
+    attacks = [
+            (A2TYoo2021,"A2TYoo2021"),
+            (BERTAttackLi2020,"BERTAttackLi2020")
+            ]
+    for attack_model,attack_name in attacks:         
+        attack = attack_model.build(language_model)
+        
+        attack_args = textattack.AttackArgs(
+            parallel = True,
+            num_examples=-1,
+            csv_coloring_style = 'html',
+            log_to_csv=f"adv_examples/{attack_name}{model_name}_html.csv",
+            # checkpoint_interval=5,
+            # checkpoint_dir="checkpoints",
+            disable_stdout=True
+        )
+        
     #Building attack
     attacker = textattack.Attacker(attack, dataset, attack_args)
     attacker.attack_dataset()
