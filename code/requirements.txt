@@ -3,5 +3,6 @@ torch==2.0.1
 sentence-transformers==2.2.2
 transformers==4.28.1
 pandas==2.0.1
+tensorflow_hub==0.13.0
 evaluate==0.4.0
-
+tensorflow==2.12.0

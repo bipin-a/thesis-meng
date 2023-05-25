@@ -1,0 +1,6 @@
+"original_text","perturbed_text","original_score","perturbed_score","original_output","perturbed_output","ground_truth_output","num_queries","result_type"
+"The sailors <font color = green>rode</font> the breeze clear of the <font color = green>rocks</font>.","The sailors <font color = green>khmer</font> the breeze clear of the <font color = green>rock</font>.",0.15155738592147827,0.33317768573760986,1,1,1,5,"Failed"
+"The <font color = green>weights</font> <font color = green>made</font> the rope stretch over the pulley.","The <font color = red>weighs</font> <font color = red>brought</font> the rope stretch over the pulley.",0.11260688304901123,0.5353007316589355,1,0,1,8,"Successful"
+"The mechanical doll wriggled itself loose.","The mechanical doll wriggled itself loose.",0.1482810378074646,0.1482810378074646,1,1,1,1,"Failed"
+"If you had <font color = green>eaten</font> more, you would <font color = green>want</font> less.","If you had <font color = green>consumed</font> more, you would <font color = green>wanna</font> less.",0.0919809341430664,0.4643247723579407,1,1,1,11,"Failed"
+"As you eat the most, you want the least.","As you eat the most, you want the least.",0.594814658164978,0.594814658164978,1,1,0,1,"Skipped"
