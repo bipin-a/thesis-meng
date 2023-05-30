@@ -1,3 +1,4 @@
+from datetime import datetime
 import pdb
 import argparse
 from datasets import load_dataset
@@ -5,7 +6,6 @@ import transformers
 import torch
 import pandas as pd
 import evaluate
-from datasets import load_dataset
 from torch.utils.data import DataLoader
 import torch
 from transformers import get_scheduler
@@ -32,15 +32,17 @@ def load_tokenize_dataset(tokenizer):
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     print(f"tokenized dataset: {tokenized_datasets}")
     tokenized_datasets.set_format("torch")
-    train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(100))
-    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(100))
+    train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(200))
+    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(200))
     
     return train_dataset, eval_dataset
 
 
 def model_training_loop(model, num_training_steps, train_dataloader, optimizer, lr_scheduler ):
+    #model = torch.nn.DataParallel(model)
     model.to(args.device)
-    print("######### \ndevice\n######### \n", args.device)
+    
+    print(f"######### \ndevice\n#########\n {args.device}")
     progress_bar = tqdm(range(num_training_steps))
     model.train()
     for epoch in range(NUM_EPOCHS):
@@ -83,21 +85,25 @@ def evaluate_model(model, eval_dataset):
         logits = outputs.logits
         predictions = torch.argmax(logits, dim=-1)
         metric.add_batch(predictions=predictions, references=batch["labels"])
-    metric.compute()
-    return metric
+    results= metric.compute()
+    return results
     
 
 def main():
     # TODO: Assumed uncased for Glue
+    current_time = datetime.now()
     model_names = ["bert-base-uncased","albert-base-v2","distilbert-base-uncased"]
     for model_name in model_names: 
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         train_dataset, eval_dataset = load_tokenize_dataset(tokenizer)
         model = train_model(train_dataset, model_name) 
         model.save_pretrained(f"models/{model_name}")
-        metric = evaluate_model(model, eval_dataset)
-        print(metric)
+        results = evaluate_model(model, eval_dataset)
+        print(results)
 
+        hyperparams = {"model": model_name, "learning_rate": LEARNING_RATE, "epochs": NUM_EPOCHS}
+        evaluate.save(f"./results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
+        
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('device', choices=['cuda','cpu'])
