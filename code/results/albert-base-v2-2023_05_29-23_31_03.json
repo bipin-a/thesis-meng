@@ -1,1 +1,0 @@
-{"accuracy": 0.695, "model": "albert-base-v2", "learning_rate": 1, "epochs": 1, "_timestamp": "2023-05-29T23:31:59.252790", "_git_commit_hash": "f35af0a2c5da42d44f79a27c9e284c737960a2da", "_evaluate_version": "0.4.0", "_python_version": "3.8.10 (default, Mar 13 2023, 10:26:41) \n[GCC 9.4.0]", "_interpreter_path": "/home/grad/baasi/myenv/bin/python3"}

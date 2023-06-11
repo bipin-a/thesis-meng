@@ -11,7 +11,7 @@ from textattack.attack_recipes import (
 )
 from datasets import load_dataset
 
-MODEL_PATH = "models/"
+MODEL_PATH = "models/checkpoints/"
 
 def load_text_attack_dataset():
     hg_dataset = load_dataset(path='glue', name='cola')
@@ -29,10 +29,10 @@ def load_language_models(model_name):
 def run_attacks(attack_model, language_model,model_name, dataset):
 
     attack_args = textattack.AttackArgs(
-        parallel = True,
-        num_examples=10,
+        parallel = False,
+        num_examples=-1,
         csv_coloring_style = 'html',
-        log_to_csv=f"adv_examples/{attack_model.__name__}{model_name}_html.csv",
+        log_to_csv=f"adv_examples/{attack_model.__name__}_{model_name}_html.csv",
         # checkpoint_interval=5,
         # checkpoint_dir="checkpoints",
         disable_stdout=True
@@ -46,12 +46,16 @@ def run_attacks(attack_model, language_model,model_name, dataset):
 def main():
     model_names = [f for f in os.listdir(MODEL_PATH)]
     data = load_text_attack_dataset()
-    attacks = [A2TYoo2021, BERTAttackLi2020]
+    attacks = [
+            A2TYoo2021,
+            #BERTAttackLi2020,
+            ]
     for model_name in model_names:
-        language_model = load_language_models(model_name)
-        for attack in attacks:
-            print(attack.__name__)
-            run_attacks(attack, language_model, model_name, data)
+        if model_name == "albert-base-v2":
+            language_model = load_language_models(model_name)
+            for attack in attacks:
+                print(attack.__name__)
+                run_attacks(attack, language_model, model_name, data)
 
 
 if __name__ == "__main__":

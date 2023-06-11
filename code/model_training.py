@@ -14,8 +14,8 @@ from transformers import AutoModelForSequenceClassification
 from transformers import AutoTokenizer
 from tqdm.auto import tqdm
 
-LEARNING_RATE = 1
-NUM_EPOCHS = 1
+LEARNING_RATE = 2e-5
+NUM_EPOCHS = 3
 
 def tokenize_function(examples, tokenizer_):
     return tokenizer_(examples["sentence"], padding="max_length", truncation=True)
@@ -32,8 +32,8 @@ def load_tokenize_dataset(tokenizer):
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     print(f"tokenized dataset: {tokenized_datasets}")
     tokenized_datasets.set_format("torch")
-    train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(200))
-    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(200))
+    train_dataset = tokenized_datasets["train"].shuffle(seed=42)
+    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
     
     return train_dataset, eval_dataset
 
@@ -92,17 +92,21 @@ def evaluate_model(model, eval_dataset):
 def main():
     # TODO: Assumed uncased for Glue
     current_time = datetime.now()
-    model_names = ["bert-base-uncased","albert-base-v2","distilbert-base-uncased"]
+    model_names = [
+            "bert-base-uncased",
+            "albert-base-v2",
+            "distilbert-base-uncased",
+            ]
     for model_name in model_names: 
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         train_dataset, eval_dataset = load_tokenize_dataset(tokenizer)
         model = train_model(train_dataset, model_name) 
-        model.save_pretrained(f"models/{model_name}")
+        model.save_pretrained(f"models/checkpoints/{model_name}")
         results = evaluate_model(model, eval_dataset)
         print(results)
 
         hyperparams = {"model": model_name, "learning_rate": LEARNING_RATE, "epochs": NUM_EPOCHS}
-        evaluate.save(f"./results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
+        evaluate.save(f"models/results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
