@@ -31,8 +31,8 @@ def run_attacks(attack_model, language_model,model_name, dataset):
     attack_args = textattack.AttackArgs(
         parallel = False,
         num_examples=-1,
-        csv_coloring_style = 'html',
-        log_to_csv=f"adv_examples/{attack_model.__name__}_{model_name}_html.csv",
+        csv_coloring_style = 'file',
+        log_to_csv=f"adv_examples/{attack_model.__name__}_{model_name}_file.csv",
         # checkpoint_interval=5,
         # checkpoint_dir="checkpoints",
         disable_stdout=True
@@ -51,11 +51,10 @@ def main():
             #BERTAttackLi2020,
             ]
     for model_name in model_names:
-        if model_name == "albert-base-v2":
-            language_model = load_language_models(model_name)
-            for attack in attacks:
-                print(attack.__name__)
-                run_attacks(attack, language_model, model_name, data)
+        language_model = load_language_models(model_name)
+        for attack in attacks:
+            print(attack.__name__)
+            run_attacks(attack, language_model, model_name, data)
 
 
 if __name__ == "__main__":
