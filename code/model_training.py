@@ -1,4 +1,5 @@
 from datetime import datetime
+from transformers import GPT2Tokenizer, GPT2Model
 import pdb
 import argparse
 from datasets import load_dataset
@@ -14,31 +15,35 @@ from transformers import AutoModelForSequenceClassification
 from transformers import AutoTokenizer
 from tqdm.auto import tqdm
 
-LEARNING_RATE = 2e-5
-NUM_EPOCHS = 3
-
 def tokenize_function(examples, tokenizer_):
-    return tokenizer_(examples["sentence"], padding="max_length", truncation=True)
+    return tokenizer_(
+            examples["sentence"],
+            padding="max_length",
+            truncation=True
+            )
 
-def load_tokenize_dataset(tokenizer):
-    data = load_dataset(path='glue', name='cola') 
+def load_tokenize_dataset(tokenizer, path_='glue', name_='cola'):
+    data = load_dataset(path=path_, name=name_) 
     print(data)
 
     print(pd.DataFrame(data["train"]).label.value_counts())
     print(pd.DataFrame(data["validation"]).label.value_counts())
-    tokenized_datasets = data.map(tokenize_function, batched=True, fn_kwargs={"tokenizer_": tokenizer})
+    tokenized_datasets = data.map(tokenize_function, 
+                                  batched=True,
+                                  fn_kwargs={"tokenizer_": tokenizer}
+                                  )
     tokenized_datasets = tokenized_datasets.remove_columns(["idx"])
     tokenized_datasets = tokenized_datasets.remove_columns(["sentence"])
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     print(f"tokenized dataset: {tokenized_datasets}")
     tokenized_datasets.set_format("torch")
-    train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
+    train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(200))
+    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(50))
     
     return train_dataset, eval_dataset
 
 
-def model_training_loop(model, num_training_steps, train_dataloader, optimizer, lr_scheduler ):
+def model_training_loop(model, optimizer, train_dataloader, num_training_steps, lr_scheduler, args, NUM_EPOCHS):
     #model = torch.nn.DataParallel(model)
     model.to(args.device)
     
@@ -57,24 +62,32 @@ def model_training_loop(model, num_training_steps, train_dataloader, optimizer, 
             progress_bar.update(1)
     return model
 
-def train_model(train_dataset,model_name):
+def train_model(train_dataset,
+                model_name, 
+                args,
+                tuning_params={"LEARNING_RATE": 2e-5, "NUM_EPOCHS": 3}
+                ):
+    LEARNING_RATE = tuning_params.get("LEARNING_RATE")
+    NUM_EPOCHS = tuning_params.get("NUM_EPOCHS")
+    # Getting Training Hyperparams
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2) 
+    optimizer = AdamW(model.parameters(), lr=LEARNING_RATE) 
     train_dataloader = DataLoader(train_dataset,
                               shuffle=True,
                               batch_size=8)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2) 
-    optimizer = AdamW(model.parameters(), lr=LEARNING_RATE) 
     num_training_steps = NUM_EPOCHS * len(train_dataloader)
-    # TODO: Update from default
     lr_scheduler = get_scheduler(
         name="linear",
         optimizer=optimizer,
         num_warmup_steps=0,
         num_training_steps=num_training_steps
     )
-    model = model_training_loop(model, num_training_steps, train_dataloader, optimizer, lr_scheduler)
+
+    # Training Loop
+    model = model_training_loop(model, optimizer, train_dataloader, num_training_steps, lr_scheduler, args, NUM_EPOCHS)
     return model
 
-def evaluate_model(model, eval_dataset):
+def evaluate_model(model, eval_dataset, args):
     eval_dataloader = DataLoader(eval_dataset, batch_size=8)
     metric = evaluate.load("accuracy")
     model.eval()
@@ -88,7 +101,33 @@ def evaluate_model(model, eval_dataset):
     results= metric.compute()
     return results
     
+def model_training_pipeline(model_config, args):
+    print(model_config)
+    # TODO: Assumed uncased for Glue
+    dataset_path = model_config.get('tuning_dataset').get('path')
+    dataset_name = model_config.get('tuning_dataset').get('name')
+    model_names = model_config.get('names')
+    tuning_params= model_config.get('tuning_params')
+    current_time = datetime.now()
 
+    print(dataset_path, dataset_name)
+    print(model_names)
+    print(tuning_params)
+    for model_name in model_names: 
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        train_dataset, eval_dataset = load_tokenize_dataset(tokenizer,
+                                                            path_=dataset_path,
+                                                            name_=dataset_name
+                                                           )
+        model = train_model(train_dataset, model_name, args, tuning_params) 
+        model.save_pretrained(f"models/checkpoints/{model_name}")
+        results = evaluate_model(model, eval_dataset, args)
+        print(results)
+
+        hyperparams = {"model": model_name}
+        hyperparams.update(tuning_params)
+        evaluate.save(f"models/results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
+        
 def main():
     # TODO: Assumed uncased for Glue
     current_time = datetime.now()
@@ -118,4 +157,6 @@ if __name__ == '__main__':
         except Exception as e:
             print(e)
     print('running main')
+    LEARNING_RATE = 5
+    NUM_EPOCHS = 1
     main()
