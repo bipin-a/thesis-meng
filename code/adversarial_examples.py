@@ -30,13 +30,13 @@ def load_language_model(model_name):
     wrapped_language_model = HuggingFaceModelWrapper(model,tokenizer)
     return wrapped_language_model
 
-def run_attack(attack_model, wrapped_language_model, model_name, dataset):
+def run_attack(attack_model, wrapped_language_model, model_name, dataset, experiment_name):
 
     attack_args = textattack.AttackArgs(
         parallel = False,
         num_examples=-1,
         csv_coloring_style = 'file',
-        log_to_csv=f"adv_examples/{attack_model.__name__}_{model_name}_file.csv",
+        log_to_csv=f"{experiment_name}/adv_examples/{attack_model.__name__}_{model_name}_file.csv",
         # checkpoint_interval=5,
         # checkpoint_dir="checkpoints",
         disable_stdout=True
@@ -48,16 +48,15 @@ def run_attack(attack_model, wrapped_language_model, model_name, dataset):
     attacker.attack_dataset()
 
 def adversarial_examples_pipeline(configs,language_models):
-
-    current_time = configs.get("current_time")
     attack_names = configs.get('adv_attacks').get('names')
+    experiment_name = configs.get('experiment_name')
     data = load_validation_dataset()
  
     for language_model in language_models:
         wrapped_language_model = wrap_language_model(language_model) 
         for attack_name in attack_names:
             attack = getattr(attack_recipes, attack_name)
-            run_attack(attack, wrapped_language_model, language_model.name_or_path, data)
+            run_attack(attack, wrapped_language_model, language_model.name_or_path, data, experiment_name)
 
 def main():
     model_names = [f for f in os.listdir(MODEL_PATH)]

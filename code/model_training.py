@@ -37,8 +37,8 @@ def load_tokenize_dataset(tokenizer, path_='glue', name_='cola'):
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     print(f"tokenized dataset: {tokenized_datasets}")
     tokenized_datasets.set_format("torch")
-    train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
+    train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(500))
+    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(50))
     
     return train_dataset, eval_dataset
 
@@ -111,7 +111,6 @@ def model_training_pipeline(configs, args):
     dataset_config = model_config.get('tuning_dataset')
     model_names = model_config.get('names')
     tuning_params= model_config.get('tuning_params')
-    current_time = configs.get('current_time')
     experiment_name = configs.get('experiment_name')
 
     tuned_models = []
@@ -128,7 +127,7 @@ def model_training_pipeline(configs, args):
 
         hyperparams = {"model": model_name}
         hyperparams.update(tuning_params)
-        evaluate.save(f"{experiment_name}/models/results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
+        evaluate.save(f"{experiment_name}/models/results/{model_name}.json", **results, **hyperparams)
         tuned_models.append(model)
     print("Completed Training Pipeline", tuned_models)
     return tuned_models

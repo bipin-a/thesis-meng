@@ -1,1 +1,0 @@
-{"accuracy": 0.8235858101629914, "model": "bert-base-uncased", "learning_rate": 2e-05, "epochs": 3, "_timestamp": "2023-06-10T01:21:37.466323", "_git_commit_hash": "957fa8ddbffdf246eac34ab5f756466ccd6dddb1", "_evaluate_version": "0.4.0", "_python_version": "3.8.10 (default, May 26 2023, 14:05:08) \n[GCC 9.4.0]", "_interpreter_path": "/home/grad/baasi/myenv/bin/python"}

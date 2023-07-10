@@ -6,11 +6,8 @@ from model_training import model_training_pipeline
 from adversarial_examples import adversarial_examples_pipeline
 
 def main(configs, args):
-    current_time = datetime.now()
-    configs.update({"current_time": current_time})
 
     language_models = model_training_pipeline(configs, args)
-    print('Completed model Training \n', language_models)
     adversarial_examples_pipeline(configs, language_models)
 
 if __name__=="__main__":
@@ -19,6 +16,8 @@ if __name__=="__main__":
     parser.add_argument('--config-file', type=str, help='Config file for the run.', required=True)
     args = parser.parse_args()
 
+    current_time = datetime.now()
+    current_time = current_time.strftime('%Y_%m_%d-%H_%M_%S')
     if args.device=="cuda":
         try:
             torch.cuda.is_available() == True
@@ -35,6 +34,8 @@ if __name__=="__main__":
         
         for experiment in experiments:    
             for experiment_name, config in experiment.items():
-                config.update({'experiment_name':experiment_name})
+                config.update({
+                                'experiment_name':f'{experiment_name}_{current_time}'
+                                })
                 print(experiment_name)
                 main(config, args)
