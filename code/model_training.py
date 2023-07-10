@@ -37,8 +37,8 @@ def load_tokenize_dataset(tokenizer, path_='glue', name_='cola'):
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     print(f"tokenized dataset: {tokenized_datasets}")
     tokenized_datasets.set_format("torch")
-    train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(200))
-    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(50))
+    train_dataset = tokenized_datasets["train"].shuffle(seed=42)
+    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
     
     return train_dataset, eval_dataset
 
@@ -101,33 +101,38 @@ def evaluate_model(model, eval_dataset, args):
     results= metric.compute()
     return results
     
-def model_training_pipeline(model_config, args):
-    print(model_config)
-    # TODO: Assumed uncased for Glue
-    dataset_path = model_config.get('tuning_dataset').get('path')
-    dataset_name = model_config.get('tuning_dataset').get('name')
+def model_training_pipeline(configs, args):
+    '''
+    Inputs: model_config contains list of models to tune
+            args contains the device configuration of training
+    Returns: tuned_models 
+    '''
+    model_config = configs.get('base_models')
+    dataset_config = model_config.get('tuning_dataset')
     model_names = model_config.get('names')
     tuning_params= model_config.get('tuning_params')
-    current_time = datetime.now()
+    current_time = configs.get('current_time')
+    experiment_name = configs.get('experiment_name')
 
-    print(dataset_path, dataset_name)
-    print(model_names)
-    print(tuning_params)
+    tuned_models = []
     for model_name in model_names: 
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         train_dataset, eval_dataset = load_tokenize_dataset(tokenizer,
-                                                            path_=dataset_path,
-                                                            name_=dataset_name
+                                                            path_=dataset_config.get('path'),
+                                                            name_=dataset_config.get('name')
                                                            )
         model = train_model(train_dataset, model_name, args, tuning_params) 
-        model.save_pretrained(f"models/checkpoints/{model_name}")
+        model.save_pretrained(f"{experiment_name}/models/checkpoints/{model_name}")
         results = evaluate_model(model, eval_dataset, args)
         print(results)
 
         hyperparams = {"model": model_name}
         hyperparams.update(tuning_params)
-        evaluate.save(f"models/results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
-        
+        evaluate.save(f"{experiment_name}/models/results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
+        tuned_models.append(model)
+    print("Completed Training Pipeline", tuned_models)
+    return tuned_models
+
 def main():
     # TODO: Assumed uncased for Glue
     current_time = datetime.now()
@@ -157,6 +162,6 @@ if __name__ == '__main__':
         except Exception as e:
             print(e)
     print('running main')
-    LEARNING_RATE = 5
-    NUM_EPOCHS = 1
+    LEARNING_RATE = 2e-5
+    NUM_EPOCHS = 3
     main()

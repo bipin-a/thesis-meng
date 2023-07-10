@@ -1,0 +1,1 @@
+{"accuracy": 0.3, "model": "distilbert-base-uncased", "LEARNING_RATE": 3, "NUM_EPOCHS": 1, "_timestamp": "2023-07-10T09:18:08.892241", "_git_commit_hash": "8f9cf7c608ad7fe74d73b4192107469d1b2522ce", "_evaluate_version": "0.4.0", "_python_version": "3.8.10 (default, May 26 2023, 14:05:08) \n[GCC 9.4.0]", "_interpreter_path": "/home/grad/baasi/myenv/bin/python3"}
