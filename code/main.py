@@ -1,3 +1,5 @@
+from pydantic.utils import deep_update
+import torch
 from datetime import datetime
 import argparse
 import yaml
@@ -37,5 +39,9 @@ if __name__=="__main__":
                 config.update({
                                 'experiment_name':f'{experiment_name}_{current_time}'
                                 })
+                LR = config.get('base_models').get('tuning_params').get('LEARNING_RATE')
+                LR = float(LR)
+                update_LR = {'base_models':{'tuning_params':{'LEARNING_RATE': LR}}}
+                config = deep_update(config, update_LR)
                 print(experiment_name)
                 main(config, args)

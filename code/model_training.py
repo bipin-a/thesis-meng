@@ -37,8 +37,8 @@ def load_tokenize_dataset(tokenizer, path_='glue', name_='cola'):
     tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
     print(f"tokenized dataset: {tokenized_datasets}")
     tokenized_datasets.set_format("torch")
-    train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(500))
-    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(50))
+    train_dataset = tokenized_datasets["train"].shuffle(seed=42)
+    eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
     
     return train_dataset, eval_dataset
 

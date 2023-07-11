@@ -9,7 +9,7 @@ Experiment_1:
       - albert-base-v2
       - distilbert-base-uncased
     tuning_params:
-      LEARNING_RATE: 3
+      LEARNING_RATE: 2e-5
       NUM_EPOCHS: 3
   adv_attacks:
     names:
