@@ -9,8 +9,22 @@ from adversarial_examples import adversarial_examples_pipeline
 
 def main(configs, args):
 
-    language_models = model_training_pipeline(configs, args)
-    adversarial_examples_pipeline(configs, language_models)
+        
+    experiment_name = configs.get('experiment_name')
+    
+    MODEL_ROOT = lambda experiment_name, model_name: f"{experiment_name}/{model_name}/checkpoint/"
+    ADV_DATASET_ROOT = lambda experiment_name, model_name, dataset_name: f"{experiment_name}/{model_name}/{attack_name}/{dataset_name}/"
+    ADV_INFERENCE_RESULTS_ROOT = lambda experiment_name, model_name, attack_name, dataset_name: f"{experiment_name}/{model_name}/{attack_name}/{dataset_name}/results/"
+ 
+    with open(write_config_path, 'r') as f:
+        json.dumps(configs, f)
+    
+    language_models = model_training_pipeline(configs, MODEL_ROOT, args)
+    dataset_names = adversarial_examples_pipeline(configs, ADV_DATASET_ROOT, language_models)
+    inference_pipeline(config, language_models, dataset_names, ADV_DATASET_ROOT, ADV_INFERENCE_RESULTS_ROOT)
+    # fidelity_pipeline()
+    # transferability_pipeline()
+
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()

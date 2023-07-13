@@ -88,8 +88,9 @@ def train_model(train_dataset,
     return model
 
 def evaluate_model(model, eval_dataset, args):
-    eval_dataloader = DataLoader(eval_dataset, batch_size=8)
-    metric = evaluate.load("accuracy")
+    logging.info(f"Evaluating Model with model: {model} and dataset: {eval_adv_dataset}")
+    eval_dataloader = DataLoader(eval_adv_dataset, batch_size=8)
+    evaluation_metrics = evaluate.combine(["accuracy", "recall", "precision", "f1"])
     model.eval()
     for batch in eval_dataloader:
         batch = {k: v.to(args.device) for k, v in batch.items()}
@@ -97,11 +98,11 @@ def evaluate_model(model, eval_dataset, args):
             outputs = model(**batch)
         logits = outputs.logits
         predictions = torch.argmax(logits, dim=-1)
-        metric.add_batch(predictions=predictions, references=batch["labels"])
-    results= metric.compute()
+        evaluation_metrics.add_batch(predictions=predictions, references=batch["labels"])
+    results = evaluation_metrics.compute()
     return results
     
-def model_training_pipeline(configs, args):
+def model_training_pipeline(configs, MODEL_ROOT, args):
     '''
     Inputs: model_config contains list of models to tune
             args contains the device configuration of training
@@ -121,46 +122,13 @@ def model_training_pipeline(configs, args):
                                                             name_=dataset_config.get('name')
                                                            )
         model = train_model(train_dataset, model_name, args, tuning_params) 
-        model.save_pretrained(f"{experiment_name}/models/checkpoints/{model_name}")
+        model.save_pretrained(f"{MODEL_ROOT}/{model_name}")
         results = evaluate_model(model, eval_dataset, args)
         print(results)
 
         hyperparams = {"model": model_name}
         hyperparams.update(tuning_params)
-        evaluate.save(f"{experiment_name}/models/results/{model_name}.json", **results, **hyperparams)
+        evaluate.save(f"{MODEL_ROOT}/{model_name}.json", **results, **hyperparams)
         tuned_models.append(model)
     print("Completed Training Pipeline", tuned_models)
     return tuned_models
-
-def main():
-    # TODO: Assumed uncased for Glue
-    current_time = datetime.now()
-    model_names = [
-            "bert-base-uncased",
-            "albert-base-v2",
-            "distilbert-base-uncased",
-            ]
-    for model_name in model_names: 
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        train_dataset, eval_dataset = load_tokenize_dataset(tokenizer)
-        model = train_model(train_dataset, model_name) 
-        model.save_pretrained(f"models/checkpoints/{model_name}")
-        results = evaluate_model(model, eval_dataset)
-        print(results)
-
-        hyperparams = {"model": model_name, "learning_rate": LEARNING_RATE, "epochs": NUM_EPOCHS}
-        evaluate.save(f"models/results/{model_name}-{current_time.strftime('%Y_%m_%d-%H_%M_%S')}.json", **results, **hyperparams)
-        
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('device', choices=['cuda','cpu'])
-    args = parser.parse_args()
-    if args.device=="cuda":
-        try:
-            torch.cuda.is_available() == True
-        except Exception as e:
-            print(e)
-    print('running main')
-    LEARNING_RATE = 2e-5
-    NUM_EPOCHS = 3
-    main()
