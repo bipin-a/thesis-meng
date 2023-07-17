@@ -3,6 +3,7 @@ from pydantic.utils import deep_update
 from datetime import datetime
 import torch
 import argparse
+import os
 import yaml
 
 from adversarial_examples import DatasetPipeline
@@ -22,44 +23,41 @@ class MLExperiment:
         self.device = device
         self.ROOT = f"{self.experiment_name}/"
 
+        print(self.dataset_config)
+        config_write_path = f'{self.ROOT}experiment.config'
+        os.makedirs(os.path.dirname(config_write_path), exist_ok=True)
         
-        with open(f'{self.ROOT}experiment.config', 'r') as f:
-            json.dumps(config, f)
+        with open(f'{self.ROOT}experiment.config', 'w') as f:
+            json.dump(config, f)
 
-    @staticmethod
-    def load_dataset_pipeline(self):
-        return DatasetPipeline(self.dataset_config)
+    def load_dataset_pipeline(self, dataset_config):
+        return DatasetPipeline(dataset_config)
 
-
-    @staticmethod
     def load_model_pipeline(self, model_name):
         self.MODEL_DIR = f"{self.ROOT}{model_name}/checkpoint/"
         self.MODEL_EVAL_PATH = f"{self.MODEL_DIR}{model_name}.json"
         return ModelPipeline(model_name, self.tuning_params, self.device)
 
-    @staticmethod
     def tune_base_models_pipeline(self, dataset_pipeline):
         # Train models
         tuned_models = []
         for model_name in self.model_names:
-            model_pipeline = self.load_model_pipeline()
+            model_pipeline = self.load_model_pipeline(model_name)
             model = model_pipeline()
             train_dataloader, eval_dataloader = dataset_pipeline.tokenize_load_dataset(model_name)
-            tuned_model = model_pipeline.train(model, train_dataloader, self.device)
+            tuned_model = model_pipeline.train(model, train_dataloader)
             model.save_pretrained(self.MODEL_DIR)
             results = model_pipeline.evaluate_model(model, eval_dataloader, self.MODEL_EVAL_PATH)
             print(results)
             tuned_models.append(tuned_model)
         return tuned_models
 
-    @staticmethod
     def load_adv_attack_pipeline(self, language_model, attack_name, dataset_pipeline):
         dataset_name = dataset_pipeline.name
         raw_dataset = dataset_pipeline.raw_data
         ADV_DATASET_PATH = f"{self.ROOT}{attack_name}/{dataset_name}.csv"
         return AdversarialAttackPipeline(language_model, attack_name, raw_dataset, ADV_DATASET_PATH)
 
-    @staticmethod
     def generate_adversarial_examples(self, attack_names, tuned_models, raw_dataset):
         adv_dataset_names = []
         for language_model in tuned_models:
@@ -68,9 +66,9 @@ class MLExperiment:
                 adv_attack_pipeline.run_attack()
                 adv_dataset_names.append(adv_attack_pipeline.ADV_DATASET_PATH)
         return adv_dataset_names
-    
+
     def run_experiment(self):
-        dataset_pipeline = self.load_dataset_pipeline()        
+        dataset_pipeline = self.load_dataset_pipeline(self.dataset_config)        
         tuned_models = self.tune_base_models_pipeline(dataset_pipeline)
         self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
         # self.run_adv_examples_inference()
@@ -115,4 +113,4 @@ if __name__=="__main__":
             print(exc)
             raise
 
-    main(experiments, args)
+        main(experiments, args)

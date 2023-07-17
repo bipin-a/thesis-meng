@@ -11,13 +11,13 @@ class ModelPipeline:
     def __init__(self, model_name, model_hyperparams, device):
         self.model_name = model_name
 
-        self.learning_rate = model_hyperparams.get('learning_rate')
-        self.num_epochs = model_hyperparams.get('num_epochs')
+        self.learning_rate = model_hyperparams.get('LEARNING_RATE')
+        self.num_epochs = model_hyperparams.get('NUM_EPOCHS')
         self.device = device
 
     def __call__(self, num_labels=2):
-        model = AutoModelForSequenceClassification(self.model_name,
-                                                   num_labels=num_labels)
+        model = AutoModelForSequenceClassification.from_pretrained(self.model_name,
+                                                                    num_labels=num_labels)
         self.optimizer = AdamW(model.parameters(), lr=self.learning_rate) 
         return model
 
