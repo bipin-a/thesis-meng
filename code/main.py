@@ -55,14 +55,15 @@ class MLExperiment:
     def load_adv_attack_pipeline(self, language_model, attack_name, dataset_pipeline):
         dataset_name = dataset_pipeline.name
         raw_dataset = dataset_pipeline.raw_data
-        ADV_DATASET_PATH = f"{self.ROOT}{attack_name}/{dataset_name}.csv"
+        model_name = language_model.name_or_path
+        ADV_DATASET_PATH = f"{self.ROOT}{model_name}/{attack_name}/{dataset_name}.csv"
         return AdversarialAttackPipeline(language_model, attack_name, raw_dataset, ADV_DATASET_PATH)
 
-    def generate_adversarial_examples(self, attack_names, tuned_models, raw_dataset):
+    def generate_adversarial_examples(self, attack_names, tuned_models, dataset_pipeline):
         adv_dataset_names = []
         for language_model in tuned_models:
             for attack_name in attack_names:
-                adv_attack_pipeline = self.load_adv_attack_pipeline(language_model, attack_name, raw_dataset)
+                adv_attack_pipeline = self.load_adv_attack_pipeline(language_model, attack_name, dataset_pipeline)
                 adv_attack_pipeline.run_attack()
                 adv_dataset_names.append(adv_attack_pipeline.ADV_DATASET_PATH)
         return adv_dataset_names

@@ -10,7 +10,7 @@ from tqdm.auto import tqdm
 class ModelPipeline:
     def __init__(self, model_name, model_hyperparams, device):
         self.model_name = model_name
-
+        self.model_hyperparams = model_hyperparams
         self.learning_rate = model_hyperparams.get('LEARNING_RATE')
         self.num_epochs = model_hyperparams.get('NUM_EPOCHS')
         self.device = device
@@ -43,7 +43,6 @@ class ModelPipeline:
 
 
     def train(self, model, train_dataloader):
-        print(f"Evaluating Model with model: {model} and dataset: {train_dataloader}")
         # Getting Training Hyperparams
         self.num_training_steps = self.num_epochs * len(train_dataloader)
         self.lr_scheduler = get_scheduler(
@@ -57,7 +56,6 @@ class ModelPipeline:
 
 
     def evaluate_model(self, tuned_model, eval_dataloader, MODEL_EVAL_PATH):
-        print(f"Evaluating Model with model: {tuned_model} and dataset: {eval_dataloader}")
         evaluation_metrics = evaluate.combine(["accuracy", "recall", "precision", "f1"])
         tuned_model.eval()
         for batch in eval_dataloader:
@@ -70,8 +68,8 @@ class ModelPipeline:
         results = evaluation_metrics.compute()
 
         hyperparams = {"model": self.model_name}
-        hyperparams.update(self.tuning_params)
-        evaluate.save(MODEL_EVAL_PATH, **results, **hyperparams)
+        hyperparams.update(self.model_hyperparams)
 
+        evaluate.save(MODEL_EVAL_PATH, **results, **hyperparams)
         return results
 

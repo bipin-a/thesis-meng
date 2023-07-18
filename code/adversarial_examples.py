@@ -80,6 +80,6 @@ class AdversarialAttackPipeline:
         )
             
         #Building attack
-        attack = self.adv_attack_model.attack_model.build(self.wrapped_language_model)
+        attack = self.adv_attack_model.build(self.wrapped_language_model)
         attacker = textattack.Attacker(attack, self.wrapped_validation_dataset, attack_args)
         attacker.attack_dataset()
