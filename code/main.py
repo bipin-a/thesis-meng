@@ -9,8 +9,7 @@ import yaml
 from adversarial_examples import DatasetPipeline
 from model_training import ModelPipeline
 from adversarial_examples import AdversarialAttackPipeline
-
-        # self.ADV_INFERENCE_RESULTS_ROOT = f"{self.ADV_DATASET_ROOT}/results/"
+from inference import InferenceAdvExamplesPipeline
 
 class MLExperiment:
     def __init__(self, config, device):
@@ -60,24 +59,44 @@ class MLExperiment:
         return AdversarialAttackPipeline(language_model, attack_name, raw_dataset, ADV_DATASET_PATH)
 
     def generate_adversarial_examples(self, attack_names, tuned_models, dataset_pipeline):
-        adv_dataset_names = []
+        adv_dataset_paths = []
         for language_model in tuned_models:
             for attack_name in attack_names:
                 adv_attack_pipeline = self.load_adv_attack_pipeline(language_model, attack_name, dataset_pipeline)
                 adv_attack_pipeline.run_attack()
-                adv_dataset_names.append(adv_attack_pipeline.ADV_DATASET_PATH)
-        return adv_dataset_names
+                adv_dataset_paths.append(adv_attack_pipeline.ADV_DATASET_PATH)
+        return adv_dataset_paths
+
+    def run_adv_examples_inference(self, tuned_models, adv_dataset_paths):
+        adv_results = {}
+        for tuned_model in tuned_models:
+            model_name = tuned_model.name_or_path
+            for adv_dataset_path in adv_dataset_paths:
+                ADV_INFERENCE_RESULTS_ROOT = f"{self.ROOT}/results/{model_name}/"
+                inference_pipeline = InferenceAdvExamplesPipeline(tuned_model,
+                                                                   adv_dataset_path, 
+                                                                   self.device,
+                                                                   ADV_INFERENCE_RESULTS_ROOT)
+                dataset = inference_pipeline.load_to_hg_data()
+                tokenized_dataset = inference_pipeline.tokenize_dataset(dataset)
+                results = inference_pipeline.evaluate_model(tokenized_dataset)
+                adv_results[(tuned_model.name_or_path, adv_dataset_path)] = results
+                print(results)
+
+        print("Completed Inference Pipeline")
+        return adv_results
+
 
     def run_experiment(self):
         dataset_pipeline = self.load_dataset_pipeline(self.dataset_config)        
         tuned_models = self.tune_base_models_pipeline(dataset_pipeline)
-        self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
-        # self.run_adv_examples_inference()
+        adv_dataset_paths = self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
+        adv_results = self.run_adv_examples_inference(tuned_models, adv_dataset_paths)
+        print(adv_results)
         # self.get_fidelity()
         # self.get_transferability()
         
 def main(experiments,args):
-
     device = args.device
     for experiment in experiments:    
         for experiment_name, config in experiment.items():
@@ -94,10 +113,13 @@ def main(experiments,args):
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--device', choices=['cuda','cpu'], required=True)
-    parser.add_argument('--config-file', type=str, help='Config file for the run.', required=True)
+    parser.add_argument('--device',
+                         choices=['cuda','cpu'], 
+                        required=True)
+    parser.add_argument('--config-file', type=str, 
+                        help='Config file for the run.', 
+                        required=True)
     args = parser.parse_args()
-
     current_time = datetime.now()
     current_time = current_time.strftime('%Y_%m_%d-%H_%M_%S')
     if args.device=="cuda":
@@ -113,5 +135,5 @@ if __name__=="__main__":
         except yaml.YAMLError as exc:
             print(exc)
             raise
-
         main(experiments, args)
+
