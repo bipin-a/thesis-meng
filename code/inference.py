@@ -7,9 +7,14 @@ import pandas as pd
 import os
 from datasets import Dataset
 
+def clean_perturbed_dataset(text):
+    text = text.replace('[[','')
+    text = text.replace(']]','')
+    return text
+
+
 class InferenceAdvExamplesPipeline:
-    def __init__(self, tuned_model, read_adv_dataset_path, device, write_adv_inference_results_root):
-        self.READ_ADV_DATASET_PATH = read_adv_dataset_path
+    def __init__(self, tuned_model, device, write_adv_inference_results_root):
         self.WRITE_ADV_INFERENCE_RESULTS_ROOT = write_adv_inference_results_root
         self.device = device
 
@@ -17,27 +22,21 @@ class InferenceAdvExamplesPipeline:
         self.model_name = tuned_model.name_or_path
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
 
-
-    def load_to_hg_data(self):
-        adv_df = pd.read_csv(f"{self.READ_ADV_DATASET_PATH}")[['perturbed_text','ground_truth_output']]
+    @staticmethod
+    def load_to_hg_data(read_adv_dataset_path):
+        adv_df = pd.read_csv(f"{read_adv_dataset_path}")[['perturbed_text','ground_truth_output']]
         adv_df = adv_df.rename({"perturbed_text":"sentence", "ground_truth_output":"labels"}, axis=1)
-        adv_df['sentence'] = adv_df['sentence'].apply(self.clean_perturbed_dataset)
+        adv_df['sentence'] = adv_df['sentence'].apply(clean_perturbed_dataset)
         dataset = Dataset.from_pandas(adv_df)
         return dataset
-
-    def clean_perturbed_dataset(self, text):
-        text = text.replace('[[','')
-        text = text.replace(']]','')
-        return text
-
+    
     def tokenize_function(self, examples):
         return self.tokenizer(examples["sentence"], padding="max_length", truncation=True)
-
+    
     def tokenize_dataset(self, dataset):
-        tokenized_dataset = dataset.map(
-            self.tokenize_function, 
-            batched=True,
-            )
+        tokenized_dataset = dataset.map(self.tokenize_function,
+                                        batched=True,
+                                        )
         tokenized_dataset = tokenized_dataset.remove_columns(["sentence"])
         tokenized_dataset.set_format("torch")
         return tokenized_dataset
@@ -59,5 +58,4 @@ class InferenceAdvExamplesPipeline:
 
         evaluate.save(self.WRITE_ADV_INFERENCE_RESULTS_ROOT, **results, **hyperparams) 
         return results
-
 

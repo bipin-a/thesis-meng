@@ -10,6 +10,7 @@ from adversarial_examples import DatasetPipeline
 from model_training import ModelPipeline
 from adversarial_examples import AdversarialAttackPipeline
 from inference import InferenceAdvExamplesPipeline
+from metrics import get_transferability
 
 class MLExperiment:
     def __init__(self, config, device):
@@ -40,6 +41,7 @@ class MLExperiment:
     def tune_base_models_pipeline(self, dataset_pipeline):
         # Train models
         tuned_models = []
+        model_results = {}
         for model_name in self.model_names:
             model_pipeline = self.load_model_pipeline(model_name)
             model = model_pipeline()
@@ -47,9 +49,9 @@ class MLExperiment:
             tuned_model = model_pipeline.train(model, train_dataloader)
             model.save_pretrained(self.MODEL_DIR)
             results = model_pipeline.evaluate_model(model, eval_dataloader, self.MODEL_EVAL_PATH)
-            print(results)
+            model_results[model_name] = results
             tuned_models.append(tuned_model)
-        return tuned_models
+        return tuned_models, model_results
 
     def load_adv_attack_pipeline(self, language_model, attack_name, dataset_pipeline):
         dataset_name = dataset_pipeline.name
@@ -71,30 +73,31 @@ class MLExperiment:
         adv_results = {}
         for tuned_model in tuned_models:
             model_name = tuned_model.name_or_path
-            for adv_dataset_path in adv_dataset_paths:
-                ADV_INFERENCE_RESULTS_ROOT = f"{self.ROOT}/results/{model_name}/"
-                inference_pipeline = InferenceAdvExamplesPipeline(tuned_model,
-                                                                   adv_dataset_path, 
-                                                                   self.device,
-                                                                   ADV_INFERENCE_RESULTS_ROOT)
-                dataset = inference_pipeline.load_to_hg_data()
-                tokenized_dataset = inference_pipeline.tokenize_dataset(dataset)
-                results = inference_pipeline.evaluate_model(tokenized_dataset)
-                adv_results[(tuned_model.name_or_path, adv_dataset_path)] = results
-                print(results)
+            for read_adv_dataset_path in adv_dataset_paths:
+                try:
+                    ADV_INFERENCE_RESULTS_ROOT = f"{self.ROOT}/results/{model_name}/"
+                    inference_pipeline = InferenceAdvExamplesPipeline(tuned_model,
+                                                                    self.device,
+                                                                    ADV_INFERENCE_RESULTS_ROOT)
+                    dataset = inference_pipeline.load_to_hg_data(read_adv_dataset_path)
+                    tokenized_dataset = inference_pipeline.tokenize_dataset(dataset)
+                    results = inference_pipeline.evaluate_model(tokenized_dataset)
+                    adv_results[(tuned_model.name_or_path, read_adv_dataset_path)] = results
+                    print(results)
+                except Exception as error:
+                    print(f'Failed {ADV_INFERENCE_RESULTS_ROOT} due to {error}')
+                    pass
 
         print("Completed Inference Pipeline")
         return adv_results
 
-
     def run_experiment(self):
         dataset_pipeline = self.load_dataset_pipeline(self.dataset_config)        
-        tuned_models = self.tune_base_models_pipeline(dataset_pipeline)
+        tuned_models, tuned_results = self.tune_base_models_pipeline(dataset_pipeline)
         adv_dataset_paths = self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
         adv_results = self.run_adv_examples_inference(tuned_models, adv_dataset_paths)
-        print(adv_results)
+        get_transferability(self.experiment_name, tuned_results, adv_results, self.model_names, self.attack_names)
         # self.get_fidelity()
-        # self.get_transferability()
         
 def main(experiments,args):
     device = args.device
@@ -109,7 +112,6 @@ def main(experiments,args):
             print(config.get('experiment_name'))
             experiment = MLExperiment(config, device)
             experiment.run_experiment()
-
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()

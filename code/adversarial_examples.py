@@ -20,8 +20,7 @@ class DatasetPipeline:
                 padding="max_length",
                 truncation=True
                 )
-
-
+    
     def tokenize_load_dataset(self, model_name):
 
         self.tokenized_model_name = model_name
@@ -47,6 +46,14 @@ class DatasetPipeline:
         return train_dataloader, eval_dataloader
 
 
+def wrap_language_model(model, tokenizer):
+    return HuggingFaceModelWrapper(model, tokenizer)
+
+def wrap_validation_dataset(raw_dataset):
+    return DatasetWrapper(
+        [ (i.get("sentence"), i.get("label")) for i in raw_dataset['validation'] ]
+        )
+
 class AdversarialAttackPipeline:
     def __init__(self, language_model, attack_name, raw_dataset, ADV_DATASET_PATH):
         '''
@@ -56,19 +63,11 @@ class AdversarialAttackPipeline:
 
         self.adv_attack_model = getattr(attack_recipes, attack_name)
         self.language_model_name = language_model.name_or_path
-        self.wrapped_validation_dataset = self.wrap_validation_dataset(raw_dataset)
+        self.wrapped_validation_dataset = wrap_validation_dataset(raw_dataset)
         
         tokenizer = AutoTokenizer.from_pretrained(self.language_model_name)
-        self.wrapped_language_model = self.wrap_language_model(language_model, tokenizer) 
+        self.wrapped_language_model = wrap_language_model(language_model, tokenizer) 
         self.ADV_DATASET_PATH = ADV_DATASET_PATH
-
-    def wrap_language_model(self, model, tokenizer):
-        return HuggingFaceModelWrapper(model, tokenizer)
-    
-    def wrap_validation_dataset(self, raw_dataset):
-        return DatasetWrapper(
-            [ (i.get("sentence"), i.get("label")) for i in raw_dataset['validation'] ]
-            )
 
     def run_attack(self):
         attack_args = textattack.AttackArgs(
@@ -83,3 +82,4 @@ class AdversarialAttackPipeline:
         attack = self.adv_attack_model.build(self.wrapped_language_model)
         attacker = textattack.Attacker(attack, self.wrapped_validation_dataset, attack_args)
         attacker.attack_dataset()
+

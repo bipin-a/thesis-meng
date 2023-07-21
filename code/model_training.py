@@ -41,7 +41,6 @@ class ModelPipeline:
                 progress_bar.update(1)
         return model
 
-
     def train(self, model, train_dataloader):
         # Getting Training Hyperparams
         self.num_training_steps = self.num_epochs * len(train_dataloader)
@@ -53,7 +52,6 @@ class ModelPipeline:
         )
         model = self.model_training_loop(model, train_dataloader)
         return model
-
 
     def evaluate_model(self, tuned_model, eval_dataloader, MODEL_EVAL_PATH):
         evaluation_metrics = evaluate.combine(["accuracy", "recall", "precision", "f1"])
@@ -72,4 +70,5 @@ class ModelPipeline:
 
         evaluate.save(MODEL_EVAL_PATH, **results, **hyperparams)
         return results
+
 
