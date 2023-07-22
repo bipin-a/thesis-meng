@@ -9,8 +9,8 @@ import yaml
 from adversarial_examples import DatasetPipeline
 from model_training import ModelPipeline
 from adversarial_examples import AdversarialAttackPipeline
-from inference import InferenceAdvExamplesPipeline
-from metrics import get_transferability
+from inference import InferenceAdvExamplesPipeline, load_to_hg_data
+from metrics import get_transferability, get_fidelity
 
 class MLExperiment:
     def __init__(self, config, device):
@@ -33,6 +33,7 @@ class MLExperiment:
     def load_dataset_pipeline(self, dataset_config):
         return DatasetPipeline(dataset_config)
 
+    # Tuning Model Methods
     def load_model_pipeline(self, model_name):
         self.MODEL_DIR = f"{self.ROOT}{model_name}/checkpoint/"
         self.MODEL_EVAL_PATH = f"{self.MODEL_DIR}{model_name}.json"
@@ -53,6 +54,7 @@ class MLExperiment:
             tuned_models.append(tuned_model)
         return tuned_models, model_results
 
+    # Generate Adv Examples Methods
     def load_adv_attack_pipeline(self, language_model, attack_name, dataset_pipeline):
         dataset_name = dataset_pipeline.name
         raw_dataset = dataset_pipeline.raw_data
@@ -69,6 +71,7 @@ class MLExperiment:
                 adv_dataset_paths.append(adv_attack_pipeline.ADV_DATASET_PATH)
         return adv_dataset_paths
 
+    # Inference on Adv Examples Methods
     def run_adv_examples_inference(self, tuned_models, adv_dataset_paths):
         adv_results = {}
         for tuned_model in tuned_models:
@@ -79,7 +82,7 @@ class MLExperiment:
                     inference_pipeline = InferenceAdvExamplesPipeline(tuned_model,
                                                                     self.device,
                                                                     ADV_INFERENCE_RESULTS_ROOT)
-                    dataset = inference_pipeline.load_to_hg_data(read_adv_dataset_path)
+                    dataset = load_to_hg_data(read_adv_dataset_path)
                     tokenized_dataset = inference_pipeline.tokenize_dataset(dataset)
                     results = inference_pipeline.evaluate_model(tokenized_dataset)
                     adv_results[(tuned_model.name_or_path, read_adv_dataset_path)] = results
@@ -91,14 +94,17 @@ class MLExperiment:
         print("Completed Inference Pipeline")
         return adv_results
 
+    # Experiment
     def run_experiment(self):
         dataset_pipeline = self.load_dataset_pipeline(self.dataset_config)        
         tuned_models, tuned_results = self.tune_base_models_pipeline(dataset_pipeline)
         adv_dataset_paths = self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
         adv_results = self.run_adv_examples_inference(tuned_models, adv_dataset_paths)
-        get_transferability(self.experiment_name, tuned_results, adv_results, self.model_names, self.attack_names)
-        # self.get_fidelity()
-        
+        all_transferability_results = get_transferability(self.experiment_name, tuned_results, adv_results, self.model_names, self.attack_names)
+        fidelities = get_fidelity(adv_dataset_paths)
+        print(all_transferability_results)
+        print(fidelities)
+ 
 def main(experiments,args):
     device = args.device
     for experiment in experiments:    
@@ -138,4 +144,5 @@ if __name__=="__main__":
             print(exc)
             raise
         main(experiments, args)
+
 
