@@ -101,7 +101,7 @@ class MLExperiment:
         adv_dataset_paths = self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
         adv_results = self.run_adv_examples_inference(tuned_models, adv_dataset_paths)
         all_transferability_results = get_transferability(self.experiment_name, tuned_results, adv_results, self.model_names, self.attack_names)
-        fidelities = get_fidelity(adv_dataset_paths)
+        fidelities = get_fidelity(self.experiment_name, adv_dataset_paths)
         print(all_transferability_results)
         print(fidelities)
  

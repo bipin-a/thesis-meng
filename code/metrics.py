@@ -1,3 +1,4 @@
+import os
 from evaluate import load
 import pandas as pd
 from inference import clean_perturbed_dataset
@@ -34,8 +35,10 @@ def get_transferability(experiment_name,
             
             transferability_results.append(transferability)
 
-    all_transferability_results = pd.concast(transferability_results)
+    all_transferability_results = pd.concat(transferability_results, axis=1)
     file_name = f"{experiment_name}/metrics/transferability_results.csv"
+    os.makedirs(os.path.dirname(file_name), exist_ok=True)
+
     all_transferability_results.to_csv(file_name)
     return all_transferability_results
 
@@ -58,20 +61,24 @@ def get_fidelity(experiment_name, adv_dataset_paths):
                                     references=original,
                                     lang="en")
         
-        embed_perturbed = model.encode(perturbed, convert_to_tensor=True)
-        embed_original = model.encode(original, convert_to_tensor=True)
-        
-        sentence_similarity = util.pytorch_cos_sim(embed_perturbed, embed_original)
+        # embed_perturbed = model.encode(perturbed, convert_to_tensor=True)
+        # embed_original = model.encode(original, convert_to_tensor=True)
+        # sentence_similarity = util.pytorch_cos_sim(embed_perturbed, embed_original).numpy()
 
-        fidelity_results[adv_dataset_path] = {"bertscore_result":bertscore_result,
-                                          "sentence_similarity":sentence_similarity
-                                          }
-        
         adv_dataset_name = '-'.join(adv_dataset_path.split('/')[1:-1])
 
+        fidelity_results[adv_dataset_name] = {"bertscore_result":bertscore_result,
+                                            #   "sentence_similarity":sentence_similarity
+                                              }
+
     file_name = f"{experiment_name}/metrics/fidelity_results.json"
+    os.makedirs(os.path.dirname(file_name), exist_ok=True)
+
+    print(fidelity_results)
+
     with open(file_name, 'w') as f:
         json.dump(fidelity_results, f)
     return fidelity_results
+
 
 
