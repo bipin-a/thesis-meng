@@ -1,9 +1,8 @@
 ---
-multi_attacks_default:
+imdb_all_attacks_default:
   base_models:
     tuning_dataset:
-      path: glue
-      name: cola
+      path: imdb
     names:
       - bert-base-uncased
       - albert-base-v2
@@ -15,17 +14,22 @@ multi_attacks_default:
     names:
       - A2TYoo2021
       - TextFoolerJin2019 
+      - BAEGarg2019
 # ---
-# Experiment_Name2:
+# glue_all_attacks_default:
 #   base_models:
 #     tuning_dataset:
 #       path: glue
-#       name: cola
+#       nane: cola
 #     names:
 #       - bert-base-uncased
 #       - albert-base-v2
 #       - distilbert-base-uncased
 #     tuning_params:
 #       LEARNING_RATE: 2e-5
-#       NUM_EPOCHS: 3
-
+#       NUM_EPOCHS: 2
+#   adv_attacks:
+#     names:
+#       - A2TYoo2021
+#       - TextFoolerJin2019 
+#       - BAEGarg2019

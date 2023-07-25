@@ -6,7 +6,7 @@ import argparse
 import os
 import yaml
 
-from adversarial_examples import DatasetPipeline
+from load_dataset import DatasetPipeline
 from model_training import ModelPipeline
 from adversarial_examples import AdversarialAttackPipeline
 from inference import InferenceAdvExamplesPipeline, load_to_hg_data
