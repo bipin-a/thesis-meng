@@ -1,35 +1,40 @@
 ---
-imdb_all_attacks_default:
+text_glue_attacks_default:
   base_models:
     tuning_dataset:
-      path: imdb
+      path: glue
+      name: cola
+      # Train size must be an int  or None
+      train_size: None
+      eval_size: None
     names:
       - bert-base-uncased
-      - albert-base-v2
-      - distilbert-base-uncased
+        #- albert-base-v2
+        #- distilbert-base-uncased
     tuning_params:
       LEARNING_RATE: 2e-5
-      NUM_EPOCHS: 2
+      NUM_EPOCHS: 1
   adv_attacks:
     names:
       - A2TYoo2021
-      - TextFoolerJin2019 
-      - BAEGarg2019
-# ---
-# glue_all_attacks_default:
-#   base_models:
-#     tuning_dataset:
-#       path: glue
-#       nane: cola
-#     names:
-#       - bert-base-uncased
-#       - albert-base-v2
-#       - distilbert-base-uncased
-#     tuning_params:
-#       LEARNING_RATE: 2e-5
-#       NUM_EPOCHS: 2
-#   adv_attacks:
-#     names:
-#       - A2TYoo2021
-#       - TextFoolerJin2019 
-#       - BAEGarg2019
+        # - TextFoolerJin2019 
+        #- BAEGarg2019
+        #---
+        #imdb_all_attacks_default:
+        #  base_models:
+        #    tuning_dataset:
+        #      path: imdb
+        #      train_size: 1000 
+        #      eval_size: 1000
+        #    names:
+        #      - bert-base-uncased
+        #      - albert-base-v2
+        #      - distilbert-base-uncased
+        #    tuning_params:
+        #      LEARNING_RATE: 2e-5
+        #      NUM_EPOCHS: 2
+        #  adv_attacks:
+        #    names:
+        #      - A2TYoo2021
+        #      - TextFoolerJin2019 
+        #      - BAEGarg2019

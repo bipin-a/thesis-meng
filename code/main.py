@@ -73,6 +73,7 @@ class MLExperiment:
 
     # Inference on Adv Examples Methods
     def run_adv_examples_inference(self, tuned_models, adv_dataset_paths):
+        print("Starting Inference Pipeline")
         adv_results = {}
         for tuned_model in tuned_models:
             model_name = tuned_model.name_or_path
@@ -86,7 +87,6 @@ class MLExperiment:
                     tokenized_dataset = inference_pipeline.tokenize_dataset(dataset)
                     results = inference_pipeline.evaluate_model(tokenized_dataset)
                     adv_results[(tuned_model.name_or_path, read_adv_dataset_path)] = results
-                    print(results)
                 except Exception as error:
                     print(f'Failed {ADV_INFERENCE_RESULTS_ROOT} due to {error}')
                     pass
@@ -101,7 +101,7 @@ class MLExperiment:
         adv_dataset_paths = self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
         adv_results = self.run_adv_examples_inference(tuned_models, adv_dataset_paths)
         all_transferability_results = get_transferability(self.experiment_name, tuned_results, adv_results, self.model_names, self.attack_names)
-        fidelities = get_fidelity(self.experiment_name, adv_dataset_paths)
+        fidelities = get_fidelity(self.experiment_name, self.model_names, self.attack_names)
         print(all_transferability_results)
         print(fidelities)
  
