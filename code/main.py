@@ -21,13 +21,13 @@ class MLExperiment:
         self.dataset_config = self.model_config.get('tuning_dataset')
         self.tuning_params= self.model_config.get('tuning_params')
         self.device = device
-        self.ROOT = f"{self.experiment_name}/"
+        self.ROOT = f"{self.experiment_name}"
 
         print(self.dataset_config)
-        config_write_path = f'{self.ROOT}experiment.config'
+        config_write_path = f'{self.ROOT}/experiment.config'
         os.makedirs(os.path.dirname(config_write_path), exist_ok=True)
         
-        with open(f'{self.ROOT}experiment.config', 'w') as f:
+        with open(f'{self.ROOT}/experiment.config', 'w') as f:
             json.dump(config, f)
 
     def load_dataset_pipeline(self, dataset_config):
@@ -35,8 +35,8 @@ class MLExperiment:
 
     # Tuning Model Methods
     def load_model_pipeline(self, model_name):
-        self.MODEL_DIR = f"{self.ROOT}{model_name}/checkpoint/"
-        self.MODEL_EVAL_PATH = f"{self.MODEL_DIR}{model_name}.json"
+        self.MODEL_DIR = f"{self.ROOT}/{model_name}"
+        self.MODEL_EVAL_PATH = f"{self.MODEL_DIR}/model_og_dataset_results/{model_name}.json"
         return ModelPipeline(model_name, self.tuning_params, self.device)
 
     def tune_base_models_pipeline(self, dataset_pipeline):
@@ -59,14 +59,23 @@ class MLExperiment:
         dataset_name = dataset_pipeline.name
         raw_dataset = dataset_pipeline.raw_data
         model_name = language_model.name_or_path
-        ADV_DATASET_PATH = f"{self.ROOT}{model_name}/{attack_name}/{dataset_name}.csv"
-        return AdversarialAttackPipeline(language_model, attack_name, raw_dataset, ADV_DATASET_PATH)
+        ADV_DATASET_PATH = f"{self.ROOT}/adv_datasets/{model_name}/{attack_name}/{dataset_name}.csv"
+        return AdversarialAttackPipeline(
+            language_model,
+            attack_name,
+            raw_dataset, 
+            ADV_DATASET_PATH
+            )
 
     def generate_adversarial_examples(self, attack_names, tuned_models, dataset_pipeline):
         adv_dataset_paths = []
         for language_model in tuned_models:
             for attack_name in attack_names:
-                adv_attack_pipeline = self.load_adv_attack_pipeline(language_model, attack_name, dataset_pipeline)
+                adv_attack_pipeline = self.load_adv_attack_pipeline(
+                    language_model,
+                    attack_name,
+                    dataset_pipeline
+                    )
                 adv_attack_pipeline.run_attack()
                 adv_dataset_paths.append(adv_attack_pipeline.ADV_DATASET_PATH)
         return adv_dataset_paths
@@ -78,18 +87,20 @@ class MLExperiment:
         for tuned_model in tuned_models:
             model_name = tuned_model.name_or_path
             for read_adv_dataset_path in adv_dataset_paths:
-                try:
-                    ADV_INFERENCE_RESULTS_ROOT = f"{self.ROOT}/results/{model_name}/"
-                    inference_pipeline = InferenceAdvExamplesPipeline(tuned_model,
-                                                                    self.device,
-                                                                    ADV_INFERENCE_RESULTS_ROOT)
-                    dataset = load_to_hg_data(read_adv_dataset_path)
-                    tokenized_dataset = inference_pipeline.tokenize_dataset(dataset)
-                    results = inference_pipeline.evaluate_model(tokenized_dataset)
-                    adv_results[(tuned_model.name_or_path, read_adv_dataset_path)] = results
-                except Exception as error:
-                    print(f'Failed {ADV_INFERENCE_RESULTS_ROOT} due to {error}')
-                    pass
+                victim_model_name = read_adv_dataset_path.split("/")[-3]
+                attack_name = read_adv_dataset_path.split("/")[-2]
+
+                ADV_INFERENCE_RESULTS_ROOT = f"{self.ROOT}/inference_results/{model_name}_on_{victim_model_name}_{attack_name}_result.json"
+                inference_pipeline = InferenceAdvExamplesPipeline(
+                    tuned_model,
+                    self.device,
+                    ADV_INFERENCE_RESULTS_ROOT
+                    )
+                dataset = load_to_hg_data(read_adv_dataset_path)
+                tokenized_dataset = inference_pipeline.tokenize_dataset(dataset)
+                results = inference_pipeline.evaluate_model(tokenized_dataset)
+                key = (tuned_model.name_or_path, read_adv_dataset_path)
+                adv_results[key] = results
 
         print("Completed Inference Pipeline")
         return adv_results
@@ -100,10 +111,7 @@ class MLExperiment:
         tuned_models, tuned_results = self.tune_base_models_pipeline(dataset_pipeline)
         adv_dataset_paths = self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
         adv_results = self.run_adv_examples_inference(tuned_models, adv_dataset_paths)
-        all_transferability_results = get_transferability(self.experiment_name, tuned_results, adv_results, self.model_names, self.attack_names)
         fidelities = get_fidelity(self.experiment_name, self.model_names, self.attack_names)
-        print(all_transferability_results)
-        print(fidelities)
  
 def main(experiments,args):
     device = args.device
