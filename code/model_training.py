@@ -18,14 +18,14 @@ class ModelPipeline:
     def __call__(self, num_labels=2):
         model = AutoModelForSequenceClassification.from_pretrained(self.model_name,
                                                                     num_labels=num_labels)
-        self.optimizer = AdamW(model.parameters(), lr=self.learning_rate) 
+        self.optimizer = AdamW(model.parameters(), lr=self.learning_rate)
         return model
 
 
     def model_training_loop(self, model, train_dataloader):
         #model = torch.nn.DataParallel(model)
         model.to(self.device)
-        
+
         print(f"######### \ndevice\n#########\n {self.device}")
         progress_bar = tqdm(range(self.num_training_steps))
         model.train()
@@ -62,7 +62,10 @@ class ModelPipeline:
                 outputs = tuned_model(**batch)
             logits = outputs.logits
             predictions = torch.argmax(logits, dim=-1)
-            evaluation_metrics.add_batch(predictions=predictions, references=batch["labels"])
+            evaluation_metrics.add_batch(
+                predictions=predictions,
+                references=batch["labels"]
+            )
         results = evaluation_metrics.compute()
 
         hyperparams = {"model": self.model_name}

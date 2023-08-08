@@ -26,7 +26,7 @@ class MLExperiment:
         print(self.dataset_config)
         config_write_path = f'{self.ROOT}/experiment.config'
         os.makedirs(os.path.dirname(config_write_path), exist_ok=True)
-        
+
         with open(f'{self.ROOT}/experiment.config', 'w') as f:
             json.dump(config, f)
 
@@ -36,7 +36,7 @@ class MLExperiment:
     # Tuning Model Methods
     def load_model_pipeline(self, model_name):
         self.MODEL_DIR = f"{self.ROOT}/{model_name}"
-        self.MODEL_EVAL_PATH = f"{self.MODEL_DIR}/model_og_dataset_results/{model_name}.json"
+        self.MODEL_EVAL_PATH = f"{self.ROOT}/model_og_dataset_results/{model_name}.json"
         return ModelPipeline(model_name, self.tuning_params, self.device)
 
     def tune_base_models_pipeline(self, dataset_pipeline):
@@ -59,12 +59,13 @@ class MLExperiment:
         dataset_name = dataset_pipeline.name
         raw_dataset = dataset_pipeline.raw_data
         model_name = language_model.name_or_path
-        ADV_DATASET_PATH = f"{self.ROOT}/adv_datasets/{model_name}/{attack_name}/{dataset_name}.csv"
+        ADV_DATASET_DIR = f"{self.ROOT}/adv_datasets/{model_name}/{attack_name}"
         return AdversarialAttackPipeline(
             language_model,
             attack_name,
-            raw_dataset, 
-            ADV_DATASET_PATH
+            raw_dataset,
+            dataset_name,
+            ADV_DATASET_DIR
             )
 
     def generate_adversarial_examples(self, attack_names, tuned_models, dataset_pipeline):
@@ -107,15 +108,36 @@ class MLExperiment:
 
     # Experiment
     def run_experiment(self):
-        dataset_pipeline = self.load_dataset_pipeline(self.dataset_config)        
+        dataset_pipeline = self.load_dataset_pipeline(self.dataset_config)
         tuned_models, tuned_results = self.tune_base_models_pipeline(dataset_pipeline)
-        adv_dataset_paths = self.generate_adversarial_examples(self.attack_names, tuned_models, dataset_pipeline)
-        adv_results = self.run_adv_examples_inference(tuned_models, adv_dataset_paths)
-        fidelities = get_fidelity(self.experiment_name, self.model_names, self.attack_names)
- 
+        adv_dataset_paths = self.generate_adversarial_examples(
+            self.attack_names,
+            tuned_models,
+            dataset_pipeline
+        )
+        adv_results = self.run_adv_examples_inference(
+            tuned_models,
+            adv_dataset_paths
+        )
+        fidelities = get_fidelity(
+            self.experiment_name,
+            self.model_names,
+            self.attack_names,
+            dataset_pipeline.name
+        )
+        transferabilities = get_transferability(
+            self.experiment_name,
+            tuned_results,
+            adv_results,
+            self.model_names,
+            self.attack_names
+        )
+
+
+
 def main(experiments,args):
     device = args.device
-    for experiment in experiments:    
+    for experiment in experiments:
         for experiment_name, config in experiment.items():
             config.update({
                             'experiment_name':f'{experiment_name}_{current_time}'
@@ -130,10 +152,10 @@ def main(experiments,args):
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--device',
-                         choices=['cuda','cpu'], 
+                         choices=['cuda','cpu'],
                         required=True)
-    parser.add_argument('--config-file', type=str, 
-                        help='Config file for the run.', 
+    parser.add_argument('--config-file', type=str,
+                        help='Config file for the run.',
                         required=True)
     args = parser.parse_args()
     current_time = datetime.now()

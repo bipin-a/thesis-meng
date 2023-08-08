@@ -15,7 +15,8 @@ def wrap_validation_dataset(raw_dataset):
     return DatasetWrapper(adv_eval_dataset)
 
 class AdversarialAttackPipeline:
-    def __init__(self, language_model, attack_name, raw_dataset, ADV_DATASET_PATH):
+    def __init__(self, language_model, attack_name,
+                 raw_dataset, dataset_name, ADV_DATASET_DIR):
         '''
         Wrapping Language Model
         Wrapping Validation Dataset
@@ -25,8 +26,9 @@ class AdversarialAttackPipeline:
         self.language_model_name = language_model.name_or_path
         self.wrapped_validation_dataset = wrap_validation_dataset(raw_dataset)
         tokenizer = AutoTokenizer.from_pretrained(self.language_model_name)
-        self.wrapped_language_model = wrap_language_model(language_model, tokenizer) 
-        self.ADV_DATASET_PATH = ADV_DATASET_PATH
+        self.wrapped_language_model = wrap_language_model(language_model, tokenizer)
+        self.ADV_DATASET_PATH = f"{ADV_DATASET_DIR}/{dataset_name}.csv"
+        self.ADV_DATASET_RES_PATH = f"{ADV_DATASET_DIR}/attack_summary.json"
 
     def run_attack(self):
         attack_args = textattack.AttackArgs(
@@ -34,10 +36,11 @@ class AdversarialAttackPipeline:
             num_examples=-1,
             csv_coloring_style = 'file',
             log_to_csv= self.ADV_DATASET_PATH,
+            log_summary_to_json = self.ADV_DATASET_RES_PATH,
             disable_stdout=True,
             enable_advance_metrics=True
         )
-            
+
         #Building attack
         attack = self.adv_attack_model.build(self.wrapped_language_model)
         attacker = textattack.Attacker(attack, self.wrapped_validation_dataset, attack_args)

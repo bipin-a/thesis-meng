@@ -4,41 +4,60 @@ from transformers import AutoTokenizer
 
 class DatasetPipeline:
     def __init__(self, config):
+        '''
+        load data
+        noramlize column names
+        filter to min letter count
+        shuffle
+        sample based on train and eval size
+        '''
         path_ = config.get('path')
         name_ = config.get('name')
-
-        print(path_)
+        limit_text_size = config.get('limit_text_size')
+        self.tokenize_truncation = config.get('tokenize_truncation')
+        self.name = f'{path_}_{name_}'
+        print(limit_text_size)
         if path_ == 'imdb':
             print('imdb')
             self.raw_data = load_dataset(path=path_).rename_column("text", "sentence")
-
             self.raw_data['validation'] = self.raw_data.pop('test')
-
-            print(self.raw_data)
         else:
-            self.raw_data = load_dataset(path=path_, name=name_) 
-    
-        # Remove all cases where text is less than 200 for speed.
-        self.raw_data = self.raw_data.filter(lambda x: len(x["sentence"]) > 200, batched=False)
+            self.raw_data = load_dataset(path=path_, name=name_)
+        print(self.raw_data)
+
+        # Remove all cases where text is less than text size for speed.
+        self.raw_data = self.raw_data.filter(
+            lambda x: len(x["sentence"]) < limit_text_size, batched=False
+        )
 
         self.train_len = self.raw_data['train'].num_rows
-        if config.get('train_size') != 'None':
-            self.raw_data['train'] = self.raw_data['train'].shuffle(seed=42).select(range(config.get('train_size')))
-
         self.eval_len = self.raw_data['validation'].num_rows
+
+        self.raw_data['train'] = self.raw_data['train'].shuffle(seed=42)
+        self.raw_data['validation'] = self.raw_data['validation'].shuffle(seed=42)
+
+        if config.get('train_size') != 'None':
+            self.raw_data['train'] = self.raw_data['train'].select(
+                range(config.get('train_size'))
+            )
         if config.get('eval_size') != 'None':
-            self.raw_data['validation'] = self.raw_data['validation'].shuffle(seed=42).select(range(config.get('eval_size')))
+            self.raw_data['validation'] = self.raw_data['validation'].select(
+                range(config.get('eval_size'))
+            )
+
+        print(self.raw_data)
 
     def tokenize_function(self, examples):
         return self.tokenizer(
-                examples["sentence"],
-                padding="max_length",
-                truncation=True
-                )
-    
+            examples["sentence"],
+            padding="max_length",
+            truncation=True,
+            max_length = 512,
+        )
+
     def tokenize_load_dataset(self, model_name):
         '''
-        Tokenizes using pretrained tokenizer of model_name 
+        Tokenizes using pretrained tokenizer of model_name
         Clean columns
         Shuffles and then samples using config params
         '''
@@ -62,7 +81,7 @@ class DatasetPipeline:
         eval_dataloader = DataLoader(eval_set,
                                             shuffle=False,
                                             batch_size=8)
-        
+
         print(f"train: {train_set}")
         print(f"eval: {eval_set}")
         return train_dataloader, eval_dataloader
