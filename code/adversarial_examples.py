@@ -38,7 +38,7 @@ class AdversarialAttackPipeline:
             log_to_csv= self.ADV_DATASET_PATH,
             log_summary_to_json = self.ADV_DATASET_RES_PATH,
             disable_stdout=True,
-            enable_advance_metrics=True
+#            enable_advance_metrics=True
         )
 
         #Building attack
