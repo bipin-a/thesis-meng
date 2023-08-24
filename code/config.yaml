@@ -1,12 +1,14 @@
 ---
-glue_all_attacks:
+rotten_tomatoes:
   base_models:
     tuning_dataset:
-      path: glue
-      name: cola
+      path: rotten_tomatoes
+      name: 
       # Train size must be an int  or None
       train_size: None
       eval_size: None
+      limit_text_size: 750
+      tokenize_truncation: 200
     names:
       - bert-base-uncased
       - albert-base-v2

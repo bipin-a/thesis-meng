@@ -119,21 +119,6 @@ class MLExperiment:
             tuned_models,
             adv_dataset_paths
         )
-        fidelities = get_fidelity(
-            self.experiment_name,
-            self.model_names,
-            self.attack_names,
-            dataset_pipeline.name
-        )
-        transferabilities = get_transferability(
-            self.experiment_name,
-            tuned_results,
-            adv_results,
-            self.model_names,
-            self.attack_names
-        )
-
-
 
 def main(experiments,args):
     device = args.device

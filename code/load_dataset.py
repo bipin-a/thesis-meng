@@ -17,7 +17,7 @@ class DatasetPipeline:
         self.tokenize_truncation = config.get('tokenize_truncation')
         self.name = f'{path_}_{name_}'
         print(limit_text_size)
-        if path_ == 'imdb':
+        if path_ in ('imdb','rotten_tomatoes'):
             print('imdb')
             self.raw_data = load_dataset(path=path_).rename_column("text", "sentence")
             self.raw_data['validation'] = self.raw_data.pop('test')
